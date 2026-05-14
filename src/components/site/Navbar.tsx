@@ -21,10 +21,14 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-5 md:px-8">
         <a href="#top" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-md border border-primary/40 text-primary">
-            ◈
+          <span
+            aria-hidden
+            className="grid h-8 w-8 place-items-center rounded-md border border-primary/40 font-mono text-[11px] font-bold leading-none text-primary"
+            title="HashLock"
+          >
+            0x
           </span>
-          <span className="text-lg font-bold tracking-tight">
+          <span className="font-mono text-lg font-bold tracking-[0.18em] text-foreground">
             {siteConfig.brand.name}
           </span>
         </a>
