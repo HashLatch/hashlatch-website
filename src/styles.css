@@ -117,3 +117,16 @@
     transform: translateY(0);
   }
 }
+
+@layer utilities {
+  .hex-grid-bg {
+    background-color: transparent;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+    opacity: 0.5;
+  }
+}
