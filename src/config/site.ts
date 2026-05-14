@@ -1,96 +1,114 @@
 // Single source of truth for all editable site content.
 export const siteConfig = {
   brand: {
-    name: "PoWH",
-    fullName: "Proof of White-Hat",
-    tagline:
-      "The first decentralized L1 blockchain for useful GPU mining & cryptographic bounties",
+    name: "HASHLOCK",
+    fullName: "HashLock",
+    ticker: "HLC",
+    tagline: "Unlock the Value of Compute",
   },
   nav: {
     links: [
-      { label: "About", href: "#about" },
-      { label: "Mining", href: "#mining" },
-      { label: "Bounty", href: "#bounty" },
+      { label: "Home", href: "#top" },
+      { label: "How It Works", href: "#bounty" },
+      { label: "Tokenomics", href: "#tokenomics" },
+      { label: "Roadmap", href: "#roadmap" },
       { label: "Wallet", href: "#wallet" },
       { label: "Community", href: "#community" },
     ],
     cta: { label: "Launch Wallet", href: "#wallet" },
   },
   hero: {
-    title: "Proof of White-Hat",
+    title: "Mine Blocks. Crack Hashes. Get Paid.",
     subtitle:
-      "The first decentralized L1 blockchain for useful GPU mining & cryptographic bounties",
+      "HashLock is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks.",
     primaryCta: { label: "Start Mining", href: "#mining" },
     secondaryCta: { label: "Explore Bounties", href: "#bounty" },
+    terminalLines: [
+      "> hashlock node v0.9.0 — connecting to cipherspace...",
+      "> peers: 42 | block height: 18,204 | difficulty: 0x1d00ffff",
+      "> scanning bounty mempool...",
+      "> bounty found: SHA256(?) = 0x3a2b9f... reward: 500 HLC",
+      "> GPU#0 RTX 4090  |  hashrate: 124.8 MH/s",
+      "> commit submitted ✓  awaiting reveal window...",
+    ],
   },
   about: {
-    heading: "What is PoWH?",
+    heading: "What is HashLock?",
     features: [
       {
         icon: "⚡",
-        title: "KawPow Mining",
+        title: "GPU Mining",
         description:
-          "ASIC-resistant GPU mining based on Ravencoin's proven algorithm.",
+          "KawPow algorithm — ASIC-resistant. Mine HLC with any modern GPU.",
       },
       {
-        icon: "🔒",
-        title: "Cryptographic Bounties",
+        icon: "🔓",
+        title: "Crypto Bounties",
         description:
-          "Earn extra rewards solving real-world crypto challenges.",
+          "Users lock HLC in escrow for solving hashes, recovering keys, or pentesting.",
       },
       {
-        icon: "🛡️",
-        title: "Code is Law",
-        description: "No censorship. No whitelists. Pure free market.",
+        icon: "🤝",
+        title: "Commit-Reveal",
+        description:
+          "Anti-frontrunning two-phase submission protects miner solutions on-chain.",
+      },
+      {
+        icon: "🔐",
+        title: "Trustless Escrow",
+        description:
+          "UTXO-based timelocked contracts. No middleman, no custodian, no trust required.",
       },
     ],
   },
   stats: {
-    heading: "Network Stats",
-    note: "Testnet coming soon",
+    heading: "Network Status",
+    note: "Testnet coming soon — values shown are placeholders",
     items: [
-      { label: "Current Block Height", value: "0" },
+      { label: "Block Height", value: "0" },
       { label: "Network Hashrate", value: "0 H/s" },
       { label: "Difficulty", value: "0" },
-      { label: "Circulating Supply", value: "0 POWH" },
+      { label: "Circulating Supply", value: "0 HLC" },
+      { label: "Active Bounties", value: "0" },
     ],
   },
   bounty: {
     heading: "How Bounties Work",
+    note: "Timelock protection: unclaimed bounties return to creator after 7 days.",
     steps: [
       {
         n: "01",
         title: "User Creates Bounty",
-        description: "Locks POWH tokens in escrow with target hash.",
+        description: "Locks HLC and the target hash inside a UTXO escrow.",
       },
       {
         n: "02",
         title: "Miners Compete",
-        description: "Miners attempt to crack the hash using GPU power.",
+        description: "GPU miners run hashcat/john against the target challenge.",
       },
       {
         n: "03",
-        title: "Commit & Reveal",
-        description: "Secure two-phase submission prevents solution theft.",
+        title: "Commit Solution",
+        description: "Miner submits a hash of their solution — anti-frontrun.",
       },
       {
         n: "04",
-        title: "Get Rewarded",
-        description: "Valid solution claims escrow reward automatically.",
+        title: "Reveal & Earn",
+        description: "Miner reveals the preimage and claims the escrowed HLC.",
       },
     ],
   },
   tokenomics: {
     heading: "Tokenomics",
-    badge: "No premine. No ICO.",
+    badge: "No premine. No ICO. Fair launch.",
     rows: [
-      ["Max Supply", "21,000,000 POWH"],
-      ["Consensus", "KawPow (GPU-only)"],
-      ["Block Time", "~1–2 minutes"],
-      ["Dev Fee", "2%"],
-      ["Miner Reward", "98%"],
-      ["Bounty Model", "User-funded escrow"],
-      ["Address Prefix", "P (mainnet)"],
+      ["Max Supply", "21,000,000 HLC"],
+      ["Consensus", "KawPow (GPU-only, ASIC-resistant)"],
+      ["Block Time", "~2 minutes"],
+      ["Dev Fee", "2% (transparent, for development)"],
+      ["Miner Reward", "98% of block emission"],
+      ["Bounty Model", "User-funded escrow (no extra emission)"],
+      ["Address Prefix", "H (mainnet)"],
     ] as [string, string][],
   },
   roadmap: {
@@ -98,33 +116,69 @@ export const siteConfig = {
     phases: [
       {
         phase: "Phase 1",
-        title: "Foundation",
+        title: "Genesis & Internal Testnet",
         status: "Completed",
         statusTone: "done" as const,
-        items: ["Fork Ravencoin", "Genesis block", "Internal testnet"],
+        items: ["Genesis block mined", "Core node fork", "Internal testnet live"],
       },
       {
         phase: "Phase 2",
-        title: "Bounty Engine",
+        title: "Bounty UTXO & Commit-Reveal",
         status: "In Progress",
         statusTone: "active" as const,
-        items: ["Bounty UTXO", "Commit-reveal transactions"],
+        items: ["Bounty UTXO opcodes", "Commit-reveal transactions", "Timelock refunds"],
       },
       {
         phase: "Phase 3",
-        title: "Public Testnet",
+        title: "Public Testnet & Miner Onboarding",
         status: "Planned",
         statusTone: "planned" as const,
-        items: ["Public testnet", "Miner onboarding"],
+        items: ["Open testnet", "Mining pool guides", "Faucet & block explorer"],
       },
       {
         phase: "Phase 4",
-        title: "Mainnet",
+        title: "Mainnet Launch & First Bounties",
         status: "Planned",
         statusTone: "planned" as const,
-        items: ["Mainnet launch", "First bounties", "Exchange listings"],
+        items: ["Mainnet genesis", "First public bounties", "Web wallet release"],
+      },
+      {
+        phase: "Phase 5",
+        title: "CEX/DEX Listings & Ecosystem Growth",
+        status: "Planned",
+        statusTone: "planned" as const,
+        items: ["Exchange listings", "Bounty marketplace", "Ecosystem grants"],
       },
     ],
+  },
+  why: {
+    heading: "Why HashLock?",
+    items: [
+      {
+        icon: "🎯",
+        title: "Real Utility",
+        description:
+          "Not useless hashing. Get paid for solving actual cryptographic problems.",
+      },
+      {
+        icon: "🌱",
+        title: "No Premine, No ICO",
+        description:
+          "Fair launch from block one. Pure community-driven distribution.",
+      },
+      {
+        icon: "⚖️",
+        title: "Code is Law",
+        description:
+          "No censorship. No whitelists. The free market decides everything.",
+      },
+    ],
+  },
+  wallet: {
+    heading: "Coming Soon: HashLock Web Wallet",
+    description:
+      "Generate addresses, check balances, create bounties, and manage your HLC — all from your browser. No downloads required.",
+    cta: { label: "Join Testnet Waitlist", href: "#community" },
   },
   community: {
     heading: "Join the Community",
@@ -136,12 +190,15 @@ export const siteConfig = {
     ],
   },
   footer: {
-    copyright: "Proof of White-Hat (PoWH) © 2026. Released under MIT License.",
-    motto: "Code is law.",
+    copyright: "HashLock (HLC) © 2026. Released under MIT License.",
+    motto: "No premine. No ICO. Pure proof of work.",
     links: [
       { label: "GitHub", href: "https://github.com/dstr1989/PoWH" },
       { label: "Whitepaper", href: "#" },
       { label: "Discord", href: "#" },
+      { label: "Twitter / X", href: "#" },
+      { label: "BitcoinTalk", href: "#" },
+      { label: "Cipherspace Explorer", href: "#" },
     ],
   },
 };
