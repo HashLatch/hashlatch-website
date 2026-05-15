@@ -8,14 +8,15 @@ export const siteConfig = {
   },
   nav: {
     links: [
-      { label: "Home", href: "#top" },
-      { label: "How It Works", href: "#bounty" },
-      { label: "Tokenomics", href: "#tokenomics" },
-      { label: "Roadmap", href: "#roadmap" },
-      { label: "Wallet", href: "#wallet" },
-      { label: "Community", href: "#community" },
+      { label: "Home", href: "/#top" },
+      { label: "How It Works", href: "/#bounty" },
+      { label: "Whitepaper", href: "/whitepaper" },
+      { label: "Tokenomics", href: "/#tokenomics" },
+      { label: "Roadmap", href: "/#roadmap" },
+      { label: "Wallet", href: "/#wallet" },
+      { label: "Community", href: "/#community" },
     ],
-    cta: { label: "Launch Wallet", href: "#wallet" },
+    cta: { label: "Launch Wallet", href: "/#wallet" },
   },
   hero: {
     title: "Mine Blocks. Crack Hashes. Get Paid.",
@@ -116,17 +117,25 @@ export const siteConfig = {
     phases: [
       {
         phase: "Phase 1",
-        title: "Genesis & Internal Testnet",
+        title: "Ravencoin Fork, Genesis Block, Internal Regtest",
         status: "Completed",
         statusTone: "done" as const,
-        items: ["Genesis block mined", "Core node fork", "Internal testnet live"],
+        items: [
+          "Ravencoin codebase fork",
+          "Genesis block mined",
+          "Internal regtest network live",
+        ],
       },
       {
         phase: "Phase 2",
-        title: "Bounty UTXO & Commit-Reveal",
+        title: "Bounty UTXO Implementation & Commit-Reveal",
         status: "In Progress",
         statusTone: "active" as const,
-        items: ["Bounty UTXO opcodes", "Commit-reveal transactions", "Timelock refunds"],
+        items: [
+          "Bounty UTXO opcodes",
+          "Commit-reveal transactions",
+          "Timelock refunds",
+        ],
       },
       {
         phase: "Phase 3",
@@ -137,17 +146,25 @@ export const siteConfig = {
       },
       {
         phase: "Phase 4",
-        title: "Mainnet Launch & First Bounties",
+        title: "Mainnet Launch & First Real Bounties",
         status: "Planned",
         statusTone: "planned" as const,
-        items: ["Mainnet genesis", "First public bounties", "Web wallet release"],
+        items: [
+          "Mainnet genesis",
+          "First public bounties",
+          "Web wallet release",
+        ],
       },
       {
         phase: "Phase 5",
-        title: "CEX/DEX Listings & Ecosystem Growth",
+        title: "Cipherspace Explorer & DEX Listings",
         status: "Planned",
         statusTone: "planned" as const,
-        items: ["Exchange listings", "Bounty marketplace", "Ecosystem grants"],
+        items: [
+          "Cipherspace block explorer",
+          "DEX listings",
+          "Bounty marketplace",
+        ],
       },
     ],
   },
@@ -178,7 +195,7 @@ export const siteConfig = {
     heading: "Coming Soon: HashLock Web Wallet",
     description:
       "Generate addresses, check balances, create bounties, and manage your HLC — all from your browser. No downloads required.",
-    cta: { label: "Join Testnet Waitlist", href: "#community" },
+    cta: { label: "Join Testnet Waitlist", href: "/#community" },
   },
   community: {
     heading: "Join the Community",
@@ -193,12 +210,198 @@ export const siteConfig = {
     copyright: "HashLock (HLC) © 2026. Released under MIT License.",
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
+      { label: "Whitepaper", href: "/whitepaper" },
       { label: "GitHub", href: "https://github.com/dstr1989/PoWH" },
-      { label: "Whitepaper", href: "#" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
       { label: "BitcoinTalk", href: "#" },
       { label: "Cipherspace Explorer", href: "#" },
     ],
+  },
+  whitepaper: {
+    title: "HashLock Whitepaper",
+    subtitle: "Decentralized L1 for Useful GPU Mining & Cryptographic Bounties",
+    cta: { label: "Join the HashLock Community", href: "#" },
+    sections: {
+      vision: {
+        heading: "1. Vision and Goal",
+        body: "HashLock (HLC) is the first 100% decentralized Layer 1 network combining classic GPU mining (KawPow) with a free-market reward mechanism for solving useful cryptographic tasks. Miners earn a stable base income from block rewards plus additional bounties for cracking password hashes, recovering lost wallet keys, and performing authorized penetration tests.",
+        principlesTitle: "Core Principles",
+        principles: [
+          {
+            title: "Code is Law",
+            description: "Zero censorship, no whitelists, no external control.",
+          },
+          {
+            title: "Hybrid Consensus",
+            description:
+              "Base mining (KawPow) for security + Bounty layer for extra earnings.",
+          },
+          {
+            title: "Free Market",
+            description:
+              "Anyone creates tasks by locking HLC, any miner can solve them.",
+          },
+          {
+            title: "Transaction Security",
+            description:
+              "Commit-reveal prevents front-running, escrow built into UTXO protocol.",
+          },
+        ],
+      },
+      architecture: {
+        heading: "2. Network Architecture",
+        rows: [
+          ["Codebase", "Fork of Ravencoin (Bitcoin fork)"],
+          ["Consensus", "KawPow (ASIC-resistant, GPU-optimized)"],
+          ["Transaction Model", "UTXO (Bitcoin-style)"],
+          [
+            "Scripting",
+            "OP_SHA256, OP_EQUALVERIFY, OP_CHECKLOCKTIMEVERIFY",
+          ],
+          [
+            "Base Layer",
+            "Classic block mining every ~2 minutes; emission covers GPU rig OPEX",
+          ],
+          [
+            "Bounty Layer",
+            "Special UTXOs storing targetHash, timelock, and HLC reward — solved when Hash(solution) == targetHash",
+          ],
+          [
+            "Bounty UTXO (Escrow)",
+            "Tokens locked in P2SH script enforcing OP_SHA256, OP_EQUALVERIFY, OP_CHECKLOCKTIMEVERIFY (7-day default timelock)",
+          ],
+          [
+            "Commit-Reveal Security",
+            "Commit = hash(solution + miner_address + nonce) in OP_RETURN. Reveal = plain solution referencing the commit. Nodes verify both.",
+          ],
+        ] as [string, string][],
+      },
+      software: {
+        heading: "3. Software Components",
+        rows: [
+          [
+            "HashLock Core (Node)",
+            "Forked Ravencoin node with bounty UTXO and commit-reveal support",
+          ],
+          [
+            "HashLock Miner",
+            "GPU miner (KawPow) monitoring bounty UTXOs, triggers Hashcat",
+          ],
+          [
+            "HashLock Bridge",
+            "Script connecting node to Hashcat for automated solving",
+          ],
+          [
+            "HashLock CLI/Wallet",
+            "Interface for creating bounties, commits, claiming rewards",
+          ],
+        ] as [string, string][],
+      },
+      bounties: {
+        heading: "4. Supported Bounties",
+        items: [
+          {
+            title: "Crypto Wallet Recovery",
+            description:
+              "Cracking lost passwords (Bitcoin Core, Ethereum presales, BIP39 seeds).",
+          },
+          {
+            title: "Penetration Testing",
+            description: "Cracking server hashes with owner consent.",
+          },
+          {
+            title: "Cryptographic Challenges",
+            description: "Cracking hashes with partial knowledge.",
+          },
+          {
+            title: "Future",
+            description:
+              "Any task requiring massive parallel GPU compute.",
+          },
+        ],
+      },
+      tokenomics: {
+        heading: "5. Tokenomics",
+        rows: [
+          ["Max Supply", "21,000,000 HLC"],
+          ["Block Time", "~2 minutes"],
+          ["Consensus", "KawPow (GPU-only, ASIC-resistant)"],
+          [
+            "Dev Fee",
+            "2% of block reward (development, audits, infrastructure)",
+          ],
+          ["Miner Reward", "98% of block emission"],
+          [
+            "Bounty Rewards",
+            "User-funded escrow only. ZERO additional emission.",
+          ],
+        ] as [string, string][],
+      },
+      roadmap: {
+        heading: "6. Roadmap",
+        phases: [
+          {
+            mark: "✅",
+            phase: "Phase 1",
+            title: "Ravencoin Fork, Genesis Block, Internal Regtest",
+            tone: "done" as const,
+          },
+          {
+            mark: "🔄",
+            phase: "Phase 2",
+            title: "Bounty UTXO Implementation & Commit-Reveal",
+            tone: "active" as const,
+          },
+          {
+            mark: "•",
+            phase: "Phase 3",
+            title: "Public Testnet & Miner Onboarding",
+            tone: "planned" as const,
+          },
+          {
+            mark: "•",
+            phase: "Phase 4",
+            title: "Mainnet Launch & First Real Bounties",
+            tone: "planned" as const,
+          },
+          {
+            mark: "•",
+            phase: "Phase 5",
+            title: "Cipherspace Explorer & DEX Listings",
+            tone: "planned" as const,
+          },
+        ],
+      },
+      faq: {
+        heading: "7. Expert Q&A",
+        items: [
+          {
+            q: "Is a Ravencoin fork secure?",
+            a: "Yes. Ravencoin has a proven, stable codebase (Bitcoin fork). Our modifications are limited to new transaction types and do not compromise core consensus.",
+          },
+          {
+            q: "How do you prevent bounty spam?",
+            a: "Every bounty requires a transaction fee and locks a real token reward. Spamming is economically unviable.",
+          },
+          {
+            q: "What if a miner loses their commit?",
+            a: "Commit is optional but recommended. If published but no reveal follows, funds remain locked and other miners can solve the bounty.",
+          },
+          {
+            q: "Can a bounty be solved without a commit?",
+            a: "Yes, but the plain-text solution would be visible in the mempool and could be stolen. Commit-reveal is strongly incentivized.",
+          },
+          {
+            q: "What are the computational costs for nodes?",
+            a: "Negligible. OP_SHA256 and equality checks are highly optimized. Commit transactions (OP_RETURN) are lightweight.",
+          },
+        ],
+      },
+      summary: {
+        heading: "8. Summary",
+        body: "HashLock (HLC) is history's first L1 network merging GPU mining with a free-market bounty ecosystem for useful cryptographic tasks. We reject censorship, whitelists, and central points of failure. Built on the proven Ravencoin foundation. Status: Ready for implementation.",
+      },
+    },
   },
 };
