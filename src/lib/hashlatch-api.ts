@@ -2,7 +2,7 @@
 // Calls are made directly from the user's browser; CORS must be enabled
 // server-side. All functions return parsed JSON or throw.
 
-export const HASHLATCH_API_BASE = "https://camps-through-avi-promote.trycloudflare.com/api";
+export const HASHLATCH_API_BASE = "https://automobile-martha-andrew-tasks.trycloudflare.com/api";
 export const EXAMPLE_TXID =
   "c3a8a1d210c7e0a35d11912b0919f207055af7407a33de00c1b270ac0ed98917";
 
