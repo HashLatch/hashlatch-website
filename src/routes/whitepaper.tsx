@@ -9,21 +9,21 @@ export const Route = createFileRoute("/whitepaper")({
     meta: [
       {
         title:
-          "HashLock Whitepaper — Decentralized L1 for GPU Mining & Cryptographic Bounties",
+          "HashLatch Whitepaper — Decentralized L1 for GPU Mining & Cryptographic Bounties",
       },
       {
         name: "description",
         content:
-          "Read the HashLock (HLC) whitepaper: vision, architecture, commit-reveal bounty UTXOs, KawPow consensus, tokenomics, and roadmap.",
+          "Read the HashLatch (HLC) whitepaper: vision, architecture, commit-reveal bounty UTXOs, KawPow consensus, tokenomics, and roadmap.",
       },
       {
         property: "og:title",
-        content: "HashLock Whitepaper — L1 GPU Mining & Crypto Bounties",
+        content: "HashLatch Whitepaper — L1 GPU Mining & Crypto Bounties",
       },
       {
         property: "og:description",
         content:
-          "Vision, architecture, and tokenomics for HashLock: useful GPU mining and a free-market bounty layer.",
+          "Vision, architecture, and tokenomics for HashLatch: useful GPU mining and a free-market bounty layer.",
       },
       { property: "og:type", content: "article" },
       { name: "theme-color", content: "#0A0A0F" },

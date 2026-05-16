@@ -90,7 +90,7 @@ function TerminalAnimation({ lines }: { lines: string[] }) {
         <span className="h-2.5 w-2.5 rounded-full bg-primary/70" />
         <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
         <span className="ml-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-          hashlock@cipherspace
+          hashlatch@cipherspace
         </span>
       </div>
       <div className="min-h-[160px] space-y-1 text-primary/90">

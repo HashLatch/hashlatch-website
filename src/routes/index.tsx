@@ -3,15 +3,15 @@ import { Navbar } from "@/components/site/Navbar";
 import {
   Hero,
   About,
-  Stats,
   Bounty,
   Tokenomics,
   Roadmap,
   Why,
-  WalletTeaser,
   Community,
   Footer,
 } from "@/components/site/Sections";
+import { LiveStats } from "@/components/site/LiveStats";
+import { HashLatchExtractor } from "@/components/site/HashLatchExtractor";
 import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
@@ -19,14 +19,14 @@ export const Route = createFileRoute("/")({
     meta: [
       {
         title:
-          "HashLock (HLC) — Unlock the Value of Compute · L1 GPU Mining & Crypto Bounties",
+          "HashLatch (HLC) — Unlock the Value of Compute · L1 GPU Mining & Crypto Bounties",
       },
       {
         name: "description",
         content:
-          "HashLock is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks. KawPow, no premine, code is law.",
+          "HashLatch is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks. KawPow, no premine, code is law.",
       },
-      { property: "og:title", content: "HashLock (HLC) — Unlock the Value of Compute" },
+      { property: "og:title", content: "HashLatch (HLC) — Unlock the Value of Compute" },
       {
         property: "og:description",
         content:
@@ -60,12 +60,12 @@ function Index() {
         <Navbar />
         <Hero />
         <About />
-        <Stats />
+        <LiveStats />
         <Bounty />
+        <HashLatchExtractor />
         <Tokenomics />
         <Roadmap />
         <Why />
-        <WalletTeaser />
         <Community />
         <Footer />
       </div>

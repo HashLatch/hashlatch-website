@@ -24,7 +24,7 @@ export function Navbar() {
           <span
             aria-hidden
             className="grid h-8 w-8 place-items-center rounded-md border border-primary/40 font-mono text-[11px] font-bold leading-none text-primary"
-            title="HashLock"
+            title="HashLatch"
           >
             0x
           </span>

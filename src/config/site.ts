@@ -1,31 +1,31 @@
 // Single source of truth for all editable site content.
 export const siteConfig = {
   brand: {
-    name: "HASHLOCK",
-    fullName: "HashLock",
+    name: "HASHLATCH",
+    fullName: "HashLatch",
     ticker: "HLC",
-    tagline: "Unlock the Value of Compute",
+    tagline: "Latch the Value of Compute",
   },
   nav: {
     links: [
       { label: "Home", href: "/#top" },
       { label: "How It Works", href: "/#bounty" },
-      { label: "Whitepaper", href: "/whitepaper" },
+      { label: "Decoder", href: "/decoder" },
+      { label: "Wallet", href: "/wallet" },
+      { label: "Simulator", href: "/simulator" },
       { label: "Tokenomics", href: "/#tokenomics" },
-      { label: "Roadmap", href: "/#roadmap" },
-      { label: "Wallet", href: "/#wallet" },
-      { label: "Community", href: "/#community" },
+      { label: "Whitepaper", href: "/whitepaper" },
     ],
-    cta: { label: "Launch Wallet", href: "/#wallet" },
+    cta: { label: "Launch Wallet", href: "/wallet" },
   },
   hero: {
     title: "Mine Blocks. Crack Hashes. Get Paid.",
     subtitle:
-      "HashLock is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks.",
+      "HashLatch is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks.",
     primaryCta: { label: "Start Mining", href: "#mining" },
     secondaryCta: { label: "Explore Bounties", href: "#bounty" },
     terminalLines: [
-      "> hashlock node v0.9.0 — connecting to cipherspace...",
+      "> hashlatch node v0.9.0 — connecting to cipherspace...",
       "> peers: 42 | block height: 18,204 | difficulty: 0x1d00ffff",
       "> scanning bounty mempool...",
       "> bounty found: SHA256(?) = 0x3a2b9f... reward: 500 HLC",
@@ -34,7 +34,7 @@ export const siteConfig = {
     ],
   },
   about: {
-    heading: "What is HashLock?",
+    heading: "What is HashLatch?",
     features: [
       {
         icon: "⚡",
@@ -128,25 +128,29 @@ export const siteConfig = {
       },
       {
         phase: "Phase 2",
-        title: "Bounty UTXO Implementation & Commit-Reveal",
-        status: "In Progress",
-        statusTone: "active" as const,
+        title: "Bounty UTXO, Commit-Reveal & Anti-Spam",
+        status: "Completed",
+        statusTone: "done" as const,
         items: [
           "Bounty UTXO opcodes",
           "Commit-reveal transactions",
-          "Timelock refunds",
+          "Anti-spam protections",
         ],
       },
       {
         phase: "Phase 3",
-        title: "Public Testnet & Miner Onboarding",
-        status: "Planned",
-        statusTone: "planned" as const,
-        items: ["Open testnet", "Mining pool guides", "Faucet & block explorer"],
+        title: "Public Testnet (Live on Oracle Cloud)",
+        status: "In Progress",
+        statusTone: "active" as const,
+        items: [
+          "Testnet node live on Oracle Cloud",
+          "Open RPC endpoint",
+          "Bounty marketplace alpha",
+        ],
       },
       {
         phase: "Phase 4",
-        title: "Mainnet Launch & First Real Bounties",
+        title: "Mainnet Launch & Miner Onboarding",
         status: "Planned",
         statusTone: "planned" as const,
         items: [
@@ -169,7 +173,7 @@ export const siteConfig = {
     ],
   },
   why: {
-    heading: "Why HashLock?",
+    heading: "Why HashLatch?",
     items: [
       {
         icon: "🎯",
@@ -192,7 +196,7 @@ export const siteConfig = {
     ],
   },
   wallet: {
-    heading: "Coming Soon: HashLock Web Wallet",
+    heading: "Coming Soon: HashLatch Web Wallet",
     description:
       "Generate addresses, check balances, create bounties, and manage your HLC — all from your browser. No downloads required.",
     cta: { label: "Join Testnet Waitlist", href: "/#community" },
@@ -200,32 +204,30 @@ export const siteConfig = {
   community: {
     heading: "Join the Community",
     items: [
-      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/PoWH" },
+      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/HashLatch" },
       { name: "Discord", icon: "💬", href: "#" },
       { name: "Twitter / X", icon: "𝕏", href: "#" },
       { name: "BitcoinTalk", icon: "₿", href: "#" },
     ],
   },
   footer: {
-    copyright: "HashLock (HLC) © 2026. Released under MIT License.",
+    copyright: "HashLatch (HLC) © 2026. MIT License.",
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
+      { label: "GitHub", href: "https://github.com/dstr1989/HashLatch" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "GitHub", href: "https://github.com/dstr1989/PoWH" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
-      { label: "BitcoinTalk", href: "#" },
-      { label: "Cipherspace Explorer", href: "#" },
     ],
   },
   whitepaper: {
-    title: "HashLock Whitepaper",
+    title: "HashLatch Whitepaper",
     subtitle: "Decentralized L1 for Useful GPU Mining & Cryptographic Bounties",
-    cta: { label: "Join the HashLock Community", href: "#" },
+    cta: { label: "Join the HashLatch Community", href: "#" },
     sections: {
       vision: {
         heading: "1. Vision and Goal",
-        body: "HashLock (HLC) is the first 100% decentralized Layer 1 network combining classic GPU mining (KawPow) with a free-market reward mechanism for solving useful cryptographic tasks. Miners earn a stable base income from block rewards plus additional bounties for cracking password hashes, recovering lost wallet keys, and performing authorized penetration tests.",
+        body: "HashLatch (HLC) is the first 100% decentralized Layer 1 network combining classic GPU mining (KawPow) with a free-market reward mechanism for solving useful cryptographic tasks. Miners earn a stable base income from block rewards plus additional bounties for cracking password hashes, recovering lost wallet keys, and performing authorized penetration tests.",
         principlesTitle: "Core Principles",
         principles: [
           {
@@ -281,19 +283,19 @@ export const siteConfig = {
         heading: "3. Software Components",
         rows: [
           [
-            "HashLock Core (Node)",
+            "HashLatch Core (Node)",
             "Forked Ravencoin node with bounty UTXO and commit-reveal support",
           ],
           [
-            "HashLock Miner",
+            "HashLatch Miner",
             "GPU miner (KawPow) monitoring bounty UTXOs, triggers Hashcat",
           ],
           [
-            "HashLock Bridge",
+            "HashLatch Bridge",
             "Script connecting node to Hashcat for automated solving",
           ],
           [
-            "HashLock CLI/Wallet",
+            "HashLatch CLI/Wallet",
             "Interface for creating bounties, commits, claiming rewards",
           ],
         ] as [string, string][],
@@ -362,7 +364,7 @@ export const siteConfig = {
           {
             mark: "•",
             phase: "Phase 4",
-            title: "Mainnet Launch & First Real Bounties",
+            title: "Mainnet Launch & Miner Onboarding",
             tone: "planned" as const,
           },
           {
@@ -400,7 +402,7 @@ export const siteConfig = {
       },
       summary: {
         heading: "8. Summary",
-        body: "HashLock (HLC) is history's first L1 network merging GPU mining with a free-market bounty ecosystem for useful cryptographic tasks. We reject censorship, whitelists, and central points of failure. Built on the proven Ravencoin foundation. Status: Ready for implementation.",
+        body: "HashLatch (HLC) is history's first L1 network merging GPU mining with a free-market bounty ecosystem for useful cryptographic tasks. We reject censorship, whitelists, and central points of failure. Built on the proven Ravencoin foundation. Status: Ready for implementation.",
       },
     },
   },
