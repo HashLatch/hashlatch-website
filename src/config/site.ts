@@ -200,7 +200,7 @@ export const siteConfig = {
   community: {
     heading: "Join the Community",
     items: [
-      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/PoWH" },
+      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/HashLatch" },
       { name: "Discord", icon: "💬", href: "#" },
       { name: "Twitter / X", icon: "𝕏", href: "#" },
       { name: "BitcoinTalk", icon: "₿", href: "#" },
@@ -211,7 +211,7 @@ export const siteConfig = {
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "GitHub", href: "https://github.com/dstr1989/PoWH" },
+      { label: "GitHub", href: "https://github.com/dstr1989/HashLatch" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
       { label: "BitcoinTalk", href: "#" },
