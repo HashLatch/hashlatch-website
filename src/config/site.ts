@@ -211,15 +211,13 @@ export const siteConfig = {
     ],
   },
   footer: {
-    copyright: "HashLatch (HLC) © 2026. Released under MIT License.",
+    copyright: "HashLatch (HLC) © 2026. MIT License.",
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
-      { label: "Whitepaper", href: "/whitepaper" },
       { label: "GitHub", href: "https://github.com/dstr1989/HashLatch" },
+      { label: "Whitepaper", href: "/whitepaper" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
-      { label: "BitcoinTalk", href: "#" },
-      { label: "Cipherspace Explorer", href: "#" },
     ],
   },
   whitepaper: {
