@@ -128,21 +128,25 @@ export const siteConfig = {
       },
       {
         phase: "Phase 2",
-        title: "Bounty UTXO Implementation & Commit-Reveal",
-        status: "In Progress",
-        statusTone: "active" as const,
+        title: "Bounty UTXO, Commit-Reveal & Anti-Spam",
+        status: "Completed",
+        statusTone: "done" as const,
         items: [
           "Bounty UTXO opcodes",
           "Commit-reveal transactions",
-          "Timelock refunds",
+          "Anti-spam protections",
         ],
       },
       {
         phase: "Phase 3",
-        title: "Public Testnet & Miner Onboarding",
-        status: "Planned",
-        statusTone: "planned" as const,
-        items: ["Open testnet", "Mining pool guides", "Faucet & block explorer"],
+        title: "Public Testnet (Live on Oracle Cloud)",
+        status: "In Progress",
+        statusTone: "active" as const,
+        items: [
+          "Testnet node live on Oracle Cloud",
+          "Open RPC endpoint",
+          "Bounty marketplace alpha",
+        ],
       },
       {
         phase: "Phase 4",
