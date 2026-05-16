@@ -150,7 +150,7 @@ export const siteConfig = {
       },
       {
         phase: "Phase 4",
-        title: "Mainnet Launch & First Real Bounties",
+        title: "Mainnet Launch & Miner Onboarding",
         status: "Planned",
         statusTone: "planned" as const,
         items: [
@@ -366,7 +366,7 @@ export const siteConfig = {
           {
             mark: "•",
             phase: "Phase 4",
-            title: "Mainnet Launch & First Real Bounties",
+            title: "Mainnet Launch & Miner Onboarding",
             tone: "planned" as const,
           },
           {
