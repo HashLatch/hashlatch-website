@@ -2,7 +2,7 @@
 // Calls are made directly from the user's browser; CORS must be enabled
 // server-side. All functions return parsed JSON or throw.
 
-export const HASHLATCH_API_BASE = "http://92.5.32.114:5000/api";
+export const HASHLATCH_API_BASE = "https://hugh-queen-ceramic-quickly.trycloudflare.com/api";
 export const EXAMPLE_TXID =
   "c3a8a1d210c7e0a35d11912b0919f207055af7407a33de00c1b270ac0ed98917";
 
