@@ -3,15 +3,15 @@ import { Navbar } from "@/components/site/Navbar";
 import {
   Hero,
   About,
-  Stats,
   Bounty,
   Tokenomics,
   Roadmap,
   Why,
-  WalletTeaser,
   Community,
   Footer,
 } from "@/components/site/Sections";
+import { LiveStats } from "@/components/site/LiveStats";
+import { HashLatchExtractor } from "@/components/site/HashLatchExtractor";
 import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
@@ -60,12 +60,12 @@ function Index() {
         <Navbar />
         <Hero />
         <About />
-        <Stats />
+        <LiveStats />
         <Bounty />
+        <HashLatchExtractor />
         <Tokenomics />
         <Roadmap />
         <Why />
-        <WalletTeaser />
         <Community />
         <Footer />
       </div>
