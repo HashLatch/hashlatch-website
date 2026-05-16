@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HASHLATCH_API_BASE } from "@/lib/hashlatch-api";
 
-export default function Wallet() {
+export function Wallet() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [address, setAddress] = useState("");
   const [seedPhrase, setSeedPhrase] = useState("");
