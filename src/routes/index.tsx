@@ -19,14 +19,14 @@ export const Route = createFileRoute("/")({
     meta: [
       {
         title:
-          "HashLock (HLC) — Unlock the Value of Compute · L1 GPU Mining & Crypto Bounties",
+          "HashLatch (HLC) — Unlock the Value of Compute · L1 GPU Mining & Crypto Bounties",
       },
       {
         name: "description",
         content:
-          "HashLock is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks. KawPow, no premine, code is law.",
+          "HashLatch is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks. KawPow, no premine, code is law.",
       },
-      { property: "og:title", content: "HashLock (HLC) — Unlock the Value of Compute" },
+      { property: "og:title", content: "HashLatch (HLC) — Unlock the Value of Compute" },
       {
         property: "og:description",
         content:
