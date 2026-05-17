@@ -48,7 +48,7 @@ export const api = {
   blockchainInfo: () => get<Record<string, unknown>>("/blockchaininfo"),
   balance: (address?: string) =>
     get<Record<string, unknown>>(
-      address ? `/balance/${encodeURIComponent(address)}` : "/balance",
+      "/balance",
     ),
   getSeedPhrase: () =>
     get<{ address: string; seed_phrase: string } & Record<string, unknown>>(
