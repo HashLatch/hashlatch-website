@@ -218,6 +218,7 @@ export const siteConfig = {
       { label: "Whitepaper", href: "/whitepaper" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
+      { label: "Explorer", href: "#" },
     ],
   },
   whitepaper: {
