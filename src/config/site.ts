@@ -8,13 +8,13 @@ export const siteConfig = {
   },
   nav: {
     links: [
-      { label: "Home", href: "/#top" },
-      { label: "How It Works", href: "/#bounty" },
+      { label: "Home", href: "/" },
       { label: "Decoder", href: "/decoder" },
       { label: "Wallet", href: "/wallet" },
       { label: "Simulator", href: "/simulator" },
       { label: "Tokenomics", href: "/#tokenomics" },
       { label: "Whitepaper", href: "/whitepaper" },
+      { label: "Explorer", href: "#" },
     ],
     cta: { label: "Launch Wallet", href: "/wallet" },
   },
