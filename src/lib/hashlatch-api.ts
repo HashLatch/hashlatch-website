@@ -2,7 +2,9 @@
 // CORS is configured server-side.
 
 export const HASHLATCH_API_BASE =
-  "https://api.hashlatch.online/api";
+  "http://34.185.173.154:5000/api";
+
+export const EXPLORER_URL = "http://34.185.173.154:3001";
 
 export const EXAMPLE_TXID =
   "ca0eb66f0374a9ba7d2a03325213a814d54f01bac7967407e9adf2fb9c9fb641";
@@ -48,7 +50,11 @@ export const api = {
   blockchainInfo: () => get<Record<string, unknown>>("/blockchaininfo"),
   balance: (address?: string) =>
     get<Record<string, unknown>>(
-      "/balance",
+      address ? `/balance/${encodeURIComponent(address)}` : "/balance",
+    ),
+  transactions: (address: string) =>
+    get<Record<string, unknown>>(
+      `/transactions/${encodeURIComponent(address)}`,
     ),
   getSeedPhrase: () =>
     get<{ address: string; seed_phrase: string } & Record<string, unknown>>(
@@ -56,6 +62,15 @@ export const api = {
     ),
   decode: (txid: string) =>
     get<Record<string, unknown>>(`/decode/${encodeURIComponent(txid)}`),
+  send: (body: { from?: string; to: string; amount: number; seed?: string }) =>
+    post<Record<string, unknown>>("/send", body),
+  createBounty: (body: {
+    target_hash: string;
+    amount: number;
+    deadline: number;
+    from?: string;
+    seed?: string;
+  }) => post<Record<string, unknown>>("/bounty/create", body),
 };
 
 export async function sha256Hex(input: string): Promise<string> {
