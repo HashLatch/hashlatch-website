@@ -2,7 +2,9 @@
 // CORS is configured server-side.
 
 export const HASHLATCH_API_BASE =
-  "https://api.hashlatch.online/api";
+  "http://34.185.173.154:5000/api";
+
+export const EXPLORER_URL = "http://34.185.173.154:3001";
 
 export const EXAMPLE_TXID =
   "ca0eb66f0374a9ba7d2a03325213a814d54f01bac7967407e9adf2fb9c9fb641";
