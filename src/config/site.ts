@@ -14,7 +14,7 @@ export const siteConfig = {
       { label: "Simulator", href: "/simulator" },
       { label: "Tokenomics", href: "/#tokenomics" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Explorer", href: "#" },
+      { label: "Explorer", href: "http://34.185.173.154:3001" },
     ],
     cta: { label: "Launch Wallet", href: "/wallet" },
   },
