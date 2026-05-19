@@ -199,7 +199,7 @@ export const siteConfig = {
     heading: "Coming Soon: HashLatch Web Wallet",
     description:
       "Generate addresses, check balances, create bounties, and manage your HLC — all from your browser. No downloads required.",
-    cta: { label: "Join Testnet Waitlist", href: "/#community" },
+    cta: { label: "Join Mainnet Updates", href: "/#community" },
   },
   community: {
     heading: "Join the Community",

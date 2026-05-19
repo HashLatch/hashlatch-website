@@ -9,12 +9,12 @@ export const Route = createFileRoute("/decoder")({
       {
         name: "description",
         content:
-          "Decode any HashLatch testnet TXID and inspect OP_RETURN metadata and P2SH bounty scripts.",
+          "Decode any HashLatch mainnet TXID and inspect OP_RETURN metadata and P2SH bounty scripts.",
       },
       { property: "og:title", content: "HashLatch Transaction Decoder" },
       {
         property: "og:description",
-        content: "Inspect bounty UTXOs and commit-reveal metadata on the HashLatch testnet.",
+        content: "Inspect bounty UTXOs and commit-reveal metadata on the HashLatch mainnet.",
       },
     ],
   }),
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/decoder")({
 function DecoderPage() {
   return (
     <PageShell
-      eyebrow="testnet · raw tx"
+      eyebrow="mainnet · raw tx"
       title="Transaction Decoder"
       subtitle="Paste a TXID to inspect OP_RETURN metadata and the P2SH bounty script."
     >
