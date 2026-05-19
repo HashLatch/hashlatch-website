@@ -64,7 +64,7 @@ export function LiveStats() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
-            Live Testnet
+            Mainnet · Live
           </div>
           <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
             Network Status
@@ -89,7 +89,7 @@ export function LiveStats() {
             ? `⚠ ${error} — retrying every 30s`
             : updatedAt
               ? `↻ Updated ${new Date(updatedAt).toLocaleTimeString()} · auto-refresh 30s`
-              : "Connecting to testnet…"}
+              : "Connecting to mainnet…"}
         </div>
       </div>
     </section>

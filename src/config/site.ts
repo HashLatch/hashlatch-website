@@ -140,8 +140,8 @@ export const siteConfig = {
       {
         phase: "Phase 3",
         title: "Public Testnet (Live on Oracle Cloud)",
-        status: "In Progress",
-        statusTone: "active" as const,
+        status: "Completed",
+        statusTone: "done" as const,
         items: [
           "Testnet node live on Oracle Cloud",
           "Open RPC endpoint",
@@ -151,8 +151,8 @@ export const siteConfig = {
       {
         phase: "Phase 4",
         title: "Mainnet Launch & Miner Onboarding",
-        status: "Planned",
-        statusTone: "planned" as const,
+        status: "In Progress",
+        statusTone: "active" as const,
         items: [
           "Mainnet genesis",
           "First public bounties",
@@ -199,7 +199,7 @@ export const siteConfig = {
     heading: "Coming Soon: HashLatch Web Wallet",
     description:
       "Generate addresses, check balances, create bounties, and manage your HLC — all from your browser. No downloads required.",
-    cta: { label: "Join Testnet Waitlist", href: "/#community" },
+    cta: { label: "Join Mainnet Updates", href: "/#community" },
   },
   community: {
     heading: "Join the Community",

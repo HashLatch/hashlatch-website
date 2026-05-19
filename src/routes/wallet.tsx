@@ -1,20 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { Wallet } from "@/components/site/Wallet";
+import { CommitRevealVisualizer } from "@/components/site/CommitRevealVisualizer";
 
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "HashLatch Wallet — Testnet RPC Console" },
+      { title: "HashLatch Wallet — Mainnet RPC Console" },
       {
         name: "description",
         content:
-          "Web wallet for HashLatch (HLC) testnet: balance, addresses, real bounties via RPC.",
+          "Web wallet for HashLatch (HLC) mainnet: balance, addresses, real bounties via RPC.",
       },
       { property: "og:title", content: "HashLatch Wallet" },
       {
         property: "og:description",
-        content: "Live web wallet connected to the HashLatch testnet RPC bridge.",
+        content: "Live web wallet connected to the HashLatch mainnet RPC bridge.",
       },
     ],
   }),
@@ -24,11 +25,12 @@ export const Route = createFileRoute("/wallet")({
 function WalletPage() {
   return (
     <PageShell
-      eyebrow="testnet · live RPC"
+      eyebrow="mainnet · live RPC"
       title="HashLatch Wallet"
-      subtitle="Balances, addresses, and bounties — straight from the testnet node."
+      subtitle="Balances, addresses, and bounties — straight from the mainnet node."
     >
       <Wallet />
+      <CommitRevealVisualizer />
     </PageShell>
   );
 }
