@@ -134,20 +134,20 @@ export function HowToMine() {
           <Copyable text={MINER_CMD} />
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <a
-              href="https://github.com/HashLatch/PoWH/tree/master/miners"
+              href="https://github.com/HashLatch/PoWH/raw/master/miners"
               target="_blank"
               rel="noreferrer"
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-primary px-4 py-3 font-mono text-xs text-primary hover:bg-primary hover:text-primary-foreground"
             >
-              <Download size={14} /> Download Windows Script
+              <Download size={14} /> Download Windows .bat
             </a>
             <a
-              href="https://github.com/HashLatch/PoWH/tree/master/miners"
+              href="https://github.com/HashLatch/PoWH/raw/master/miners"
               target="_blank"
               rel="noreferrer"
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-primary px-4 py-3 font-mono text-xs text-primary hover:bg-primary hover:text-primary-foreground"
             >
-              <Download size={14} /> Download Linux Script
+              <Download size={14} /> Download Linux .sh
             </a>
           </div>
         </div>
@@ -155,3 +155,4 @@ export function HowToMine() {
     </section>
   );
 }
+
