@@ -89,7 +89,7 @@ export function LiveStats() {
             ? `⚠ ${error} — retrying every 30s`
             : updatedAt
               ? `↻ Updated ${new Date(updatedAt).toLocaleTimeString()} · auto-refresh 30s`
-              : "Connecting to testnet…"}
+              : "Connecting to mainnet…"}
         </div>
       </div>
     </section>
