@@ -70,6 +70,8 @@ export const api = {
     from?: string;
     seed?: string;
   }) => post<Record<string, unknown>>("/bounty/create", body),
+  bounties: () => get<unknown>("/bounties"),
+  walletTransactions: () => get<unknown>("/wallet/transactions"),
 };
 
 export async function sha256Hex(input: string): Promise<string> {
