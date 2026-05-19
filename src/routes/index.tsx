@@ -51,6 +51,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+import { BountyFeed } from "@/components/site/BountyFeed";
+import { HowToMine } from "@/components/site/HowToMine";
+
 function Index() {
   useReveal();
   return (
@@ -62,7 +65,9 @@ function Index() {
         <About />
         <LiveStats />
         <Bounty />
+        <BountyFeed />
         <HashLatchExtractor />
+        <HowToMine />
         <Tokenomics />
         <Roadmap />
         <Why />
