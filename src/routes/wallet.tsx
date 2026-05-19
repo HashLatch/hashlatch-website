@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { Wallet } from "@/components/site/Wallet";
+import { CommitRevealVisualizer } from "@/components/site/CommitRevealVisualizer";
 
 export const Route = createFileRoute("/wallet")({
   head: () => ({
