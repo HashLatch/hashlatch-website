@@ -30,6 +30,7 @@ function WalletPage() {
       subtitle="Balances, addresses, and bounties — straight from the testnet node."
     >
       <Wallet />
+      <CommitRevealVisualizer />
     </PageShell>
   );
 }
