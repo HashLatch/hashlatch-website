@@ -1,10 +1,9 @@
-// Browser-side client for the HashLatch testnet RPC bridge.
+// Browser-side client for the HashLatch mainnet RPC bridge.
 // CORS is configured server-side.
+import { API_BASE, EXPLORER_URL as EXPLORER } from "@/config/api";
 
-export const HASHLATCH_API_BASE =
-  "http://34.185.173.154:5000/api";
-
-export const EXPLORER_URL = "http://34.185.173.154:3001";
+export const HASHLATCH_API_BASE = API_BASE;
+export const EXPLORER_URL = EXPLORER;
 
 export const EXAMPLE_TXID =
   "ca0eb66f0374a9ba7d2a03325213a814d54f01bac7967407e9adf2fb9c9fb641";
