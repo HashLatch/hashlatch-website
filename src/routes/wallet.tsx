@@ -25,9 +25,9 @@ export const Route = createFileRoute("/wallet")({
 function WalletPage() {
   return (
     <PageShell
-      eyebrow="testnet · live RPC"
+      eyebrow="mainnet · live RPC"
       title="HashLatch Wallet"
-      subtitle="Balances, addresses, and bounties — straight from the testnet node."
+      subtitle="Balances, addresses, and bounties — straight from the mainnet node."
     >
       <Wallet />
       <CommitRevealVisualizer />
