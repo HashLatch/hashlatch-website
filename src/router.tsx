@@ -1,3 +1,4 @@
+import { Route as TopWalletsRoute } from "@/routes/top-wallets";
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
