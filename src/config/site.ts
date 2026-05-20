@@ -14,7 +14,8 @@ export const siteConfig = {
       { label: "Simulator", href: "/simulator" },
       { label: "Tokenomics", href: "/#tokenomics" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Explorer", href: "http://34.185.173.154:3001" },
+      { label: "How to Mine", href: "/#mining" },
+      { label: "Explorer", href: "https://explorer.hashlatch.online", external: true },
     ],
     cta: { label: "Launch Wallet", href: "/wallet" },
   },
@@ -64,7 +65,7 @@ export const siteConfig = {
   },
   stats: {
     heading: "Network Status",
-    note: "Testnet coming soon — values shown are placeholders",
+    note: "Mainnet · Live",
     items: [
       { label: "Block Height", value: "0" },
       { label: "Network Hashrate", value: "0 H/s" },
@@ -218,7 +219,8 @@ export const siteConfig = {
       { label: "Whitepaper", href: "/whitepaper" },
       { label: "Discord", href: "#" },
       { label: "Twitter / X", href: "#" },
-      { label: "Explorer", href: "http://34.185.173.154:3001" },
+      { label: "How to Mine", href: "/#mining" },
+      { label: "Explorer", href: "https://explorer.hashlatch.online", external: true },
     ],
   },
   whitepaper: {
