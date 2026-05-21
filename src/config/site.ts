@@ -212,6 +212,12 @@ export const siteConfig = {
     ],
   },
   footer: {
+    links: [
+      { label: "Discord", href: "https://discord.gg/patdHzX6V" },
+      { label: "Twitter / X", href: "https://x.com/HashLatch" },
+      { label: "GitHub", href: "https://github.com/HashLatch" },
+      { label: "Email", href: "mailto:contact@hashlatch.online" }
+    ],
     copyright: "HashLatch (HLC) © 2026. MIT License.",
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
