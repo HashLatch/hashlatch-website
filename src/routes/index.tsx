@@ -53,6 +53,7 @@ export const Route = createFileRoute("/")({
 
 import { BountyFeed } from "@/components/site/BountyFeed";
 import { HowToMine } from "@/components/site/HowToMine";
+import { RichList } from "@/components/site/RichList";
 
 function Index() {
   useReveal();
@@ -61,6 +62,7 @@ function Index() {
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 hex-grid-bg" />
       <div className="relative z-10">
         <Navbar />
+        <div className="pt-24 pb-4"><RichList /></div>
         <Hero />
         <About />
         <LiveStats />

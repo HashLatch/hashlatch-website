@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
 export const RichList = () => {
-  const [wallets, setWallets] = useState<any[]>([]);
+  const [allWallets, setAllWallets] = useState<any[]>([]);
+  const [displayedWallets, setDisplayedWallets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchWallets = async () => {
@@ -12,10 +14,12 @@ export const RichList = () => {
         if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
         const data = await response.json();
         const walletList = Array.isArray(data) ? data : data.data || [];
-        setWallets(walletList.slice(0, 100));
+        const sorted = walletList.sort((a: any, b: any) => (b.balance || b.b) - (a.balance || a.a));
+        setAllWallets(sorted);
+        setDisplayedWallets(sorted.slice(0, 100));
       } catch (err: any) {
-        console.error("Błąd pobierania:", err);
-        setError(err.message || "Błąd pobierania danych. Sprawdź CORS na explorerze.");
+        console.error(err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -23,26 +27,45 @@ export const RichList = () => {
     fetchWallets();
   }, []);
 
-  if (loading) return <div className="text-center p-8 text-xl">Loading top wallets...</div>;
-  if (error) return <div className="text-center p-8 text-red-500">Wystąpił błąd: {error}</div>;
-  if (wallets.length === 0) return <div className="text-center p-8">Brak portfeli.</div>;
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setDisplayedWallets(allWallets.slice(0, 100));
+    } else {
+      const filtered = allWallets.filter(w => (w.address || w.a)?.toLowerCase().includes(searchTerm.toLowerCase()));
+      setDisplayedWallets(filtered);
+    }
+  }, [searchTerm, allWallets]);
+
+  if (loading) return <div className="text-center p-8 text-muted-foreground font-mono">Ładowanie portfeli...</div>;
+  if (error) return <div className="text-center p-8 text-red-500 font-mono">Błąd: {error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">Top 100 Wallets</h2>
-      <div className="overflow-x-auto">
+    <div className="w-full max-w-6xl mx-auto p-6 bg-background/50 border border-border/30 rounded-xl my-12 z-10 relative backdrop-blur-sm">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold font-mono tracking-wider text-primary">Top 100 Wallets</h2>
+        <input 
+          type="text" 
+          placeholder="Szukaj adresu portfela (górnicy)..." 
+          className="px-4 py-2 w-full md:w-96 bg-background/80 border border-border/50 rounded-md focus:outline-none focus:border-primary text-sm font-mono text-muted-foreground"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-border/30">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-gray-700">
-              <th className="p-3">Address</th>
-              <th className="p-3">Balance</th>
+            <tr className="border-b border-border/30 bg-muted/10">
+              <th className="p-4 font-mono text-sm text-muted-foreground font-semibold">Rank</th>
+              <th className="p-4 font-mono text-sm text-muted-foreground font-semibold">Address</th>
+              <th className="p-4 font-mono text-sm text-muted-foreground font-semibold">Balance</th>
             </tr>
           </thead>
           <tbody>
-            {wallets.map((wallet, idx) => (
-              <tr key={idx} className="border-b border-gray-800 hover:bg-gray-900">
-                <td className="p-3 font-mono text-sm">{wallet.address || wallet.a}</td>
-                <td className="p-3 font-mono">{wallet.balance || wallet.b}</td>
+            {displayedWallets.map((wallet, idx) => (
+              <tr key={idx} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
+                <td className="p-4 font-mono text-sm text-muted-foreground">{idx + 1}</td>
+                <td className="p-4 font-mono text-sm text-primary">{wallet.address || wallet.a}</td>
+                <td className="p-4 font-mono text-sm">{wallet.balance || wallet.b}</td>
               </tr>
             ))}
           </tbody>
