@@ -145,8 +145,14 @@ export function Hero() {
               {hero.primaryCta.label} <ArrowRight size={16} />
             </a>
             <a
-              href={hero.secondaryCta.href}
+              href={hero.walletCta.href}
               className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/50 px-7 py-3.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+            >
+              {hero.walletCta.label}
+            </a>
+            <a
+              href={hero.secondaryCta.href}
+              className="inline-flex items-center justify-center gap-2 rounded-md px-7 py-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
               {hero.secondaryCta.label}
             </a>

@@ -9,12 +9,13 @@ export const siteConfig = {
   nav: {
     links: [
       { label: "Home", href: "/" },
+      { label: "How to Mine", href: "/#mining" },
+      { label: "Explorer", href: "https://explorer.hashlatch.online" },
       { label: "Decoder", href: "/decoder" },
       { label: "Wallet", href: "/wallet" },
       { label: "Simulator", href: "/simulator" },
       { label: "Tokenomics", href: "/#tokenomics" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Explorer", href: "http://34.185.173.154:3001" },
     ],
     cta: { label: "Launch Wallet", href: "/wallet" },
   },
@@ -23,6 +24,7 @@ export const siteConfig = {
     subtitle:
       "HashLatch is the first L1 blockchain where GPU miners earn double: block rewards plus bounties for solving real cryptographic tasks.",
     primaryCta: { label: "Start Mining", href: "#mining" },
+    walletCta: { label: "Launch Wallet", href: "/wallet" },
     secondaryCta: { label: "Explore Bounties", href: "#bounty" },
     terminalLines: [
       "> hashlatch node v0.9.0 — connecting to cipherspace...",
@@ -204,9 +206,9 @@ export const siteConfig = {
   community: {
     heading: "Join the Community",
     items: [
-      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/HashLatch" },
-      { name: "Discord", icon: "💬", href: "#" },
-      { name: "Twitter / X", icon: "𝕏", href: "#" },
+      { name: "GitHub", icon: "🐙", href: "https://github.com/HashLatch" },
+      { name: "Discord", icon: "💬", href: "https://discord.gg/patdHzX6V" },
+      { name: "Twitter / X", icon: "𝕏", href: "https://x.com/HashLatch" },
       { name: "BitcoinTalk", icon: "₿", href: "#" },
     ],
   },
@@ -214,11 +216,12 @@ export const siteConfig = {
     copyright: "HashLatch (HLC) © 2026. MIT License.",
     motto: "No premine. No ICO. Pure proof of work.",
     links: [
-      { label: "GitHub", href: "https://github.com/dstr1989/HashLatch" },
+      { label: "GitHub", href: "https://github.com/HashLatch" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Discord", href: "#" },
-      { label: "Twitter / X", href: "#" },
-      { label: "Explorer", href: "http://34.185.173.154:3001" },
+      { label: "Discord", href: "https://discord.gg/patdHzX6V" },
+      { label: "Twitter / X", href: "https://x.com/HashLatch" },
+      { label: "Top 100", href: "/top-wallets" },
+      { label: "Explorer", href: "https://explorer.hashlatch.online" },
     ],
   },
   whitepaper: {
