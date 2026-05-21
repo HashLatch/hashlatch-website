@@ -11,7 +11,7 @@ export const RichList = () => {
     const fetchWallets = async () => {
       try {
         const response = await fetch('https://explorer.hashlatch.online/ext/richlist');
-        if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
         const walletList = Array.isArray(data) ? data : data.data || [];
         const sorted = walletList.sort((a: any, b: any) => (b.balance || b.b) - (a.balance || a.a));
@@ -19,7 +19,7 @@ export const RichList = () => {
         setDisplayedWallets(sorted.slice(0, 100));
       } catch (err: any) {
         console.error(err);
-        setError(err.message);
+        setError("Cannot connect to the explorer. Please check network or CORS settings.");
       } finally {
         setLoading(false);
       }
@@ -36,8 +36,8 @@ export const RichList = () => {
     }
   }, [searchTerm, allWallets]);
 
-  if (loading) return <div className="text-center p-8 text-muted-foreground font-mono">Ładowanie portfeli...</div>;
-  if (error) return <div className="text-center p-8 text-red-500 font-mono">Błąd: {error}</div>;
+  if (loading) return <div className="text-center p-8 text-muted-foreground font-mono">Loading top wallets...</div>;
+  if (error) return <div className="text-center p-8 text-red-500 font-mono">Error: {error}</div>;
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 bg-background/50 border border-border/30 rounded-xl my-12 z-10 relative backdrop-blur-sm">
@@ -45,7 +45,7 @@ export const RichList = () => {
         <h2 className="text-2xl font-bold font-mono tracking-wider text-primary">Top 100 Wallets</h2>
         <input 
           type="text" 
-          placeholder="Szukaj adresu portfela (górnicy)..." 
+          placeholder="Search wallet address..." 
           className="px-4 py-2 w-full md:w-96 bg-background/80 border border-border/50 rounded-md focus:outline-none focus:border-primary text-sm font-mono text-muted-foreground"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -68,6 +68,11 @@ export const RichList = () => {
                 <td className="p-4 font-mono text-sm">{wallet.balance || wallet.b}</td>
               </tr>
             ))}
+            {displayedWallets.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-8 text-center text-muted-foreground font-mono">No wallets found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

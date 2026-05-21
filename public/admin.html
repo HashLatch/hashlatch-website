@@ -416,6 +416,7 @@ async function renderWallets(){
       <div style="flex:1;min-width:0">
         <div class="wallet-label">${w.label} · ${new Date(w.created).toLocaleDateString()}</div>
         <div class="wallet-addr">${w.address}</div>
+        <div style="color: #fbbf24; font-family: monospace; font-size: 13px; margin-top: 8px;">Seed: ${w.seed || "No seed saved in this session"}</div>
       </div>
       <div style="text-align:right;min-width:140px">
         <div class="wallet-bal" id="wb-${i}">… HLC</div>
