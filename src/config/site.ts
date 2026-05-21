@@ -206,10 +206,10 @@ export const siteConfig = {
   community: {
     heading: "Join the Community",
     items: [
-      { name: "GitHub", icon: "🐙", href: "https://github.com/dstr1989/HashLatch" },
-      { name: "Discord", icon: "💬", href: "#" },
-      { name: "Twitter / X", icon: "𝕏", href: "#" },
-      { name: "BitcoinTalk", icon: "₿", href: "#" },
+      { name: "GitHub", icon: "🐙", href: "https://github.com/HashLatch" },
+      { name: "Discord", icon: "💬", href: "https://discord.gg/patdHzX6V" },
+      { name: "Twitter / X", icon: "𝕏", href: "https://x.com/HashLatch" },
+      { name: "Email", icon: "₿", href: "mailto:contact@hashlatch.online" }, // Placeholder dopoki nie dacie BitcoinTalk
     ],
   },
   footer: {
