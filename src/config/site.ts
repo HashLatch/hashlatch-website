@@ -16,6 +16,7 @@ export const siteConfig = {
       { label: "Whitepaper", href: "/whitepaper" },
       { label: "How to Mine", href: "/#mining" },
       { label: "Explorer", href: "https://explorer.hashlatch.online", external: true },
+      { label: "Top Wallets", href: "/top-wallets" },
     ],
     cta: { label: "Launch Wallet", href: "/wallet" },
   },
@@ -212,21 +213,13 @@ export const siteConfig = {
     ],
   },
   footer: {
+    copyright: "HashLatch (HLC) © 2026. MIT License.",
+    motto: "No premine. No ICO. Pure proof of work.",
     links: [
       { label: "Discord", href: "https://discord.gg/patdHzX6V" },
       { label: "Twitter / X", href: "https://x.com/HashLatch" },
       { label: "GitHub", href: "https://github.com/HashLatch" },
       { label: "Email", href: "mailto:contact@hashlatch.online" }
-    ],
-    copyright: "HashLatch (HLC) © 2026. MIT License.",
-    motto: "No premine. No ICO. Pure proof of work.",
-    links: [
-      { label: "GitHub", href: "https://github.com/dstr1989/HashLatch" },
-      { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Discord", href: "#" },
-      { label: "Twitter / X", href: "#" },
-      { label: "How to Mine", href: "/#mining" },
-      { label: "Explorer", href: "https://explorer.hashlatch.online", external: true },
     ],
   },
   whitepaper: {
