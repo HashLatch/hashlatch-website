@@ -11,6 +11,7 @@ export const siteConfig = {
       { label: "Home", href: "/" },
       { label: "How to Mine", href: "/#mining" },
       { label: "Explorer", href: "https://explorer.hashlatch.online" },
+      { label: "Top Wallets", href: "/top-wallets" },
       { label: "Decoder", href: "/decoder" },
       { label: "Wallet", href: "/wallet" },
       { label: "Simulator", href: "/simulator" },
@@ -66,7 +67,7 @@ export const siteConfig = {
   },
   stats: {
     heading: "Network Status",
-    note: "Testnet coming soon — values shown are placeholders",
+    note: "Mainnet · Live",
     items: [
       { label: "Block Height", value: "0" },
       { label: "Network Hashrate", value: "0 H/s" },
@@ -209,7 +210,7 @@ export const siteConfig = {
       { name: "GitHub", icon: "🐙", href: "https://github.com/HashLatch" },
       { name: "Discord", icon: "💬", href: "https://discord.gg/patdHzX6V" },
       { name: "Twitter / X", icon: "𝕏", href: "https://x.com/HashLatch" },
-      { name: "BitcoinTalk", icon: "₿", href: "#" },
+      { name: "Email", icon: "✉️", href: "mailto:contact@hashlatch.online" },
     ],
   },
   footer: {
@@ -222,6 +223,7 @@ export const siteConfig = {
       { label: "Twitter / X", href: "https://x.com/HashLatch" },
       { label: "Top 100", href: "/top-wallets" },
       { label: "Explorer", href: "https://explorer.hashlatch.online" },
+      { label: "Email", href: "mailto:contact@hashlatch.online" },
     ],
   },
   whitepaper: {

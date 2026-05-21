@@ -335,7 +335,7 @@ export function Wallet() {
             ))}
           </div>
           <div className="mt-4 rounded-md border border-primary/40 bg-primary/5 p-3 font-mono text-xs text-primary">
-            ⚠ Zapisz te słowa w bezpiecznym miejscu. Stracisz dostęp do portfela bez nich.
+            ⚠ Save these words in a safe place. You will lose access to your wallet without them.
           </div>
         </div>
 
