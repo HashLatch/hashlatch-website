@@ -1,50 +1,53 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-interface RichEntry {
-  address: string;
-  balance: number;
-}
-
-export function RichList() {
-  const [wallets, setWallets] = useState<RichEntry[]>([]);
+export const RichList = () => {
+  const [wallets, setWallets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://explorer.hashlatch.online/ext/richlist")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setWallets(data.slice(0, 100));
-        else setWallets([]);
+    const fetchWallets = async () => {
+      try {
+        const response = await fetch('https://explorer.hashlatch.online/ext/richlist');
+        if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
+        const data = await response.json();
+        const walletList = Array.isArray(data) ? data : data.data || [];
+        setWallets(walletList.slice(0, 100));
+      } catch (err: any) {
+        console.error("Błąd pobierania:", err);
+        setError(err.message || "Błąd pobierania danych. Sprawdź CORS na explorerze.");
+      } finally {
         setLoading(false);
-      })
-      .catch(() => { setError(""); setLoading(false); });
+      }
+    };
+    fetchWallets();
   }, []);
 
-  if (loading) return <div className="text-muted text-sm py-4">Loading top wallets...</div>;
-  if (error) return <div className="text-red text-sm py-4">{error}</div>;
-  if (!wallets.length) return <div className="text-muted text-sm py-4">No wallets yet — start mining to see the rich list.</div>;
+  if (loading) return <div className="text-center p-8 text-xl">Loading top wallets...</div>;
+  if (error) return <div className="text-center p-8 text-red-500">Wystąpił błąd: {error}</div>;
+  if (wallets.length === 0) return <div className="text-center p-8">Brak portfeli.</div>;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left font-mono">
-        <thead className="text-xs uppercase text-muted border-b border-border">
-          <tr>
-            <th className="py-2 px-4">#</th>
-            <th className="py-2 px-4">Address</th>
-            <th className="py-2 px-4 text-right">Balance (HLC)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {wallets.map((wallet, index) => (
-            <tr key={wallet.address} className="border-b border-border/20 hover:bg-primary/5">
-              <td className="py-2 px-4 text-muted">{index + 1}</td>
-              <td className="py-2 px-4 truncate max-w-[200px]">{wallet.address}</td>
-              <td className="py-2 px-4 text-right text-primary">{wallet.balance.toLocaleString()}</td>
+    <div className="max-w-6xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">Top 100 Wallets</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-gray-700">
+              <th className="p-3">Address</th>
+              <th className="p-3">Balance</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {wallets.map((wallet, idx) => (
+              <tr key={idx} className="border-b border-gray-800 hover:bg-gray-900">
+                <td className="p-3 font-mono text-sm">{wallet.address || wallet.a}</td>
+                <td className="p-3 font-mono">{wallet.balance || wallet.b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
