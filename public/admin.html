@@ -267,8 +267,9 @@
 
 <script>
 const API='https://api.hashlatch.online/api';
-const PASS_HASH='5256b4864fb49ff968fe6e7b4a8939dbf1070dfbe0910ac9f6c78bb44b5e40ee';
+const PASS_HASH='e1208da933b2faa0bc1ac41ad634c06432236c7166f3cb71b8834c4b5bc8b749';
 const WALLETS_KEY='hlc_admin_wallets_v1';
+const API='https://api.hashlatch.online/api';
 
 async function sha256(str){
   const buf=new TextEncoder().encode(str);
@@ -281,6 +282,8 @@ async function doLogin(){
   const h=await sha256(pw);
   if(h===PASS_HASH){
     sessionStorage.setItem('hlc_admin','1');
+    sessionStorage.setItem('hlc_admin_token',pw);
+    sessionStorage.setItem('hlc_admin_token', pw);
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     init();
@@ -383,8 +386,37 @@ async function checkServices(){
   try{const r=await fetch('https://hashlatch.online');document.getElementById('ep-site').innerHTML=r.ok?'<span class="badge badge-green">OK</span>':'<span class="badge badge-red">DOWN</span>';document.getElementById('ep-site-r').textContent=r.status;}catch(e){document.getElementById('ep-site').innerHTML='<span class="badge badge-red">DOWN</span>';}
 }
 
-function loadSavedWallets(){try{return JSON.parse(localStorage.getItem(WALLETS_KEY)||'[]');}catch{return[];}}
-function saveSavedWallets(list){localStorage.setItem(WALLETS_KEY,JSON.stringify(list));}
+// Server-synced wallets
+let _cachedWallets = null;
+
+function getAdminToken(){
+  return sessionStorage.getItem('hlc_admin_token') || '';
+}
+
+async function loadSavedWallets(){
+  try{
+    const r = await fetch(API+'/admin/wallets', {
+      headers: {'X-Admin-Token': getAdminToken()}
+    });
+    if(r.ok){ _cachedWallets = await r.json(); return _cachedWallets; }
+  }catch(e){}
+  // fallback to localStorage
+  try{ return JSON.parse(localStorage.getItem(WALLETS_KEY)||'[]'); }catch{ return []; }
+}
+
+async function saveSavedWallets(list){
+  _cachedWallets = list;
+  try{
+    await fetch(API+'/admin/wallets', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Token': getAdminToken()},
+      body: JSON.stringify(list)
+    });
+  }catch(e){
+    // fallback to localStorage
+    localStorage.setItem(WALLETS_KEY, JSON.stringify(list));
+  }
+}
 
 let pendingWallet=null;
 
@@ -399,9 +431,9 @@ async function generateWallet(){
   }catch(e){toast('Error: '+e.message);}
 }
 
-function saveWallet(){
+async function saveWallet(){
   if(!pendingWallet)return;
-  const list=loadSavedWallets();
+  const list=await loadSavedWallets();
   list.push({label:'Wallet #'+(list.length+1),address:pendingWallet.address,seed:pendingWallet.seed_phrase,created:new Date().toISOString()});
   saveSavedWallets(list);pendingWallet=null;
   document.getElementById('new-wallet-reveal').style.display='none';
@@ -409,7 +441,7 @@ function saveWallet(){
 }
 
 async function renderWallets(){
-  const list=loadSavedWallets();
+  const list=await loadSavedWallets();
   const el=document.getElementById('wallets-list');
   if(!list.length){el.innerHTML='<div class="text-muted" style="font-size:12px">No wallets saved. Generate one above.</div>';return;}
   el.innerHTML=list.map((w,i)=>`
@@ -433,9 +465,9 @@ async function renderWallets(){
   }
 }
 
-function removeWallet(i){
+async function removeWallet(i){
   if(!confirm('Remove wallet from panel? (does NOT delete from blockchain)'))return;
-  const list=loadSavedWallets();list.splice(i,1);saveSavedWallets(list);renderWallets();
+  const list=await loadSavedWallets();list.splice(i,1);await saveSavedWallets(list);renderWallets();
 }
 
 async function sendHLC(){
