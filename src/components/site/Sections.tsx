@@ -485,23 +485,10 @@ export function Footer() {
             </p>
           </div>
           <div className="flex max-w-md flex-wrap items-center justify-center gap-x-6 gap-y-2 md:justify-end">
-            {footer.links.map((l) => (
-              <a href="https://discord.gg/patdHzX6V" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">Discord</a>
-              <a href="https://x.com/HashLatch" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">Twitter/X</a>
-              <a href="https://github.com/HashLatch" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">GitHub</a>
-              <a href="mailto:contact@hashlatch.online" className="text-muted-foreground hover:text-primary transition-colors text-sm">contact@hashlatch.online</a>
-              <a href="https://discord.gg/patdHzX6V" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">Discord</a>
-              <a href="https://x.com/HashLatch" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">Twitter/X</a>
-              <a href="https://github.com/HashLatch" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors text-sm">GitHub</a>
-              <a href="mailto:contact@hashlatch.online" className="text-muted-foreground hover:text-primary transition-colors text-sm">contact@hashlatch.online</a>
-              <a
-                key={l.label}
-                href={l.href}
-                className="text-sm text-muted-foreground transition-colors hover:text-primary"
-              >
-                {l.label}
-              </a>
-            ))}
+            <a href="https://discord.gg/patdHzX6V" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Discord</a>
+            <a href="https://x.com/HashLatch" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Twitter/X</a>
+            <a href="https://github.com/HashLatch" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">GitHub</a>
+            <a href="mailto:contact@hashlatch.online" className="text-sm text-muted-foreground transition-colors hover:text-primary">Email</a>
           </div>
         </div>
       </Container>
