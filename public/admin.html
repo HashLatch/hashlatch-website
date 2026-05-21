@@ -118,8 +118,10 @@
       <div class="nav-label">Wallets</div>
       <div class="nav-item" onclick="showSection('wallets',this)">My Wallets</div>
       <div class="nav-item" onclick="showSection('send',this)">Send HLC</div>
-      <div class="nav-label">Mining</div>
+            <div class="nav-label">Mining</div>
       <div class="nav-item" onclick="showSection('mining',this)">Mining Stats</div>
+      <div class="nav-label">Dev</div>
+      <div class="nav-item" onclick="showSection('devwallet',this)">Dev Wallet</div>
     </div>
 
     <div class="content">
@@ -231,6 +233,29 @@
             Linux:   ./miner --algo kawpow --server 34.185.173.154 --port 3052 --user &lt;ADDRESS&gt;.rig1 --pass x
           </div>
         </div>
+      
+      <div class="section" id="section-devwallet">
+        <div class="section-title">Dev Wallet (Node Default)</div>
+        <div class="cards">
+          <div class="card"><div class="card-label">Balance</div><div class="card-value" id="dev-bal">—</div><div class="card-sub">HLC</div></div>
+          <div class="card"><div class="card-label">Received</div><div class="card-value" id="dev-recv">—</div><div class="card-sub">HLC</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Default Addresses</div></div>
+          <div style="padding:20px">
+            <div class="field"><label>Get New Address</label>
+            <button class="btn btn-primary" onclick="getDevAddress()">Generate Address</button></div>
+            <div id="dev-addr-list" style="margin-top:16px"></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Mining Wallets (Saved Seeds)</div></div>
+          <div style="padding:20px">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:16px">These wallets are for mining operations. Seeds are stored in browser localStorage.</p>
+            <button class="btn btn-primary" onclick="createMiningWallet()">+ Create Mining Wallet</button>
+            <div id="mining-wallets-list" style="margin-top:16px"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -241,7 +266,7 @@
 
 <script>
 const API='https://api.hashlatch.online/api';
-const PASS_HASH='5256b4864fb49ff968fe6e7b4a8939dbf1070dfbe0910ac9f6c78bb44b5e40ee';
+const PASS_HASH='c86ba971c775ddc35c7eb4dddf3876ca26595174ba6b87ddc3e69b6d9727bf15';
 const WALLETS_KEY='hlc_admin_wallets_v1';
 
 async function sha256(str){
