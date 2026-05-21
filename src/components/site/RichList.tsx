@@ -14,7 +14,8 @@ export const RichList = () => {
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
         const walletList = Array.isArray(data) ? data : data.addresses || data.data || [];
-        const sorted = walletList.sort((a: any, b: any) => (b.balance || b.b) - (a.balance || a.a));
+        const validWallets = walletList.filter((w: any) => w.address !== "coinbase" && w.a !== "coinbase" && !isNaN(Number(w.balance || w.b)));
+        const sorted = validWallets.sort((a: any, b: any) => (b.balance || b.b) - (a.balance || a.a));
         setAllWallets(sorted);
         setDisplayedWallets(sorted.slice(0, 100));
       } catch (err: any) {
