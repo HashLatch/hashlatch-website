@@ -9,19 +9,22 @@ import {
   Send,
   Plus,
   X,
+  KeyRound,
 } from "lucide-react";
 import { api, sha256Hex } from "@/lib/hashlatch-api";
 
+// Wallet is seed-phrase first. localStorage only stores address + passwordHash
+// (never the seed itself after setup). Seed phrase works on ANY device.
+
 type StoredWallet = {
   address: string;
-  seed: string;
-  passwordHash: string; // sha256 hex
+  passwordHash: string; // sha256 of password
 };
 
-const LS_KEY = "hashlatch_wallet_v2";
+const LS_KEY = "hashlatch_wallet_v3";
 const IDLE_MS = 15 * 60 * 1000;
 
-function loadWallet(): StoredWallet | null {
+function loadStored(): StoredWallet | null {
   try {
     const raw = localStorage.getItem(LS_KEY);
     return raw ? (JSON.parse(raw) as StoredWallet) : null;
@@ -51,7 +54,7 @@ type Screen =
   | "landing"
   | "create-reveal"
   | "create-password"
-  | "login"
+  | "login-seed"
   | "locked"
   | "dashboard";
 
@@ -66,6 +69,8 @@ type Tx = {
 export function Wallet() {
   const [screen, setScreen] = useState<Screen>("landing");
   const [stored, setStored] = useState<StoredWallet | null>(null);
+  const [activeSeed, setActiveSeed] = useState<string | null>(null); // kept in memory only
+  const [activeAddress, setActiveAddress] = useState<string | null>(null);
   const [draftSeed, setDraftSeed] = useState<{ address: string; seed: string } | null>(null);
 
   const [busy, setBusy] = useState(false);
@@ -75,10 +80,10 @@ export function Wallet() {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
 
-  // login
-  const [loginMode, setLoginMode] = useState<"password" | "seed">("password");
-  const [loginPw, setLoginPw] = useState("");
+  // login with seed
   const [loginSeedTxt, setLoginSeedTxt] = useState("");
+  const [loginPw, setLoginPw] = useState("");
+  const [loginMode, setLoginMode] = useState<"seed" | "password">("seed");
 
   // dashboard
   const [balance, setBalance] = useState<string>("—");
@@ -91,14 +96,15 @@ export function Wallet() {
   const [bountyOpen, setBountyOpen] = useState(false);
 
   useEffect(() => {
-    const w = loadWallet();
+    const w = loadStored();
     if (w) {
       setStored(w);
+      setActiveAddress(w.address);
       setScreen("locked");
     }
   }, []);
 
-  // ────── idle auto-lock ──────
+  // idle auto-lock
   const idleTimer = useRef<number | null>(null);
   const resetIdle = useCallback(() => {
     if (idleTimer.current) window.clearTimeout(idleTimer.current);
@@ -106,6 +112,7 @@ export function Wallet() {
       setScreen("locked");
       setBalance("—");
       setTxs(null);
+      setActiveSeed(null);
     }, IDLE_MS);
   }, []);
   useEffect(() => {
@@ -120,7 +127,7 @@ export function Wallet() {
     };
   }, [screen, resetIdle]);
 
-  // ────── balance polling ──────
+  // balance polling
   const fetchBalance = useCallback(async (addr: string) => {
     setBalLoading(true);
     setBalErr(null);
@@ -154,14 +161,14 @@ export function Wallet() {
   }, []);
 
   useEffect(() => {
-    if (screen !== "dashboard" || !stored) return;
-    fetchBalance(stored.address);
-    fetchTxs(stored.address);
-    const id = setInterval(() => fetchBalance(stored.address), 30_000);
+    if (screen !== "dashboard" || !activeAddress) return;
+    fetchBalance(activeAddress);
+    fetchTxs(activeAddress);
+    const id = setInterval(() => fetchBalance(activeAddress), 30_000);
     return () => clearInterval(id);
-  }, [screen, stored, fetchBalance, fetchTxs]);
+  }, [screen, activeAddress, fetchBalance, fetchTxs]);
 
-  // ────── actions ──────
+  // ── Create new wallet ──
   const startCreate = async () => {
     setBusy(true);
     setErr(null);
@@ -185,72 +192,76 @@ export function Wallet() {
 
   const confirmPassword = async () => {
     setErr(null);
-    if (pw.length < 8) {
-      setErr("Password must be at least 8 characters");
-      return;
-    }
-    if (pw !== pw2) {
-      setErr("Passwords do not match");
-      return;
-    }
+    if (pw.length < 8) { setErr("Password must be at least 8 characters"); return; }
+    if (pw !== pw2) { setErr("Passwords do not match"); return; }
     if (!draftSeed) return;
     const passwordHash = await sha256Hex(pw);
-    const w: StoredWallet = {
-      address: draftSeed.address,
-      seed: draftSeed.seed,
-      passwordHash,
-    };
+    const w: StoredWallet = { address: draftSeed.address, passwordHash };
     localStorage.setItem(LS_KEY, JSON.stringify(w));
     setStored(w);
+    setActiveAddress(draftSeed.address);
+    setActiveSeed(draftSeed.seed);
     setDraftSeed(null);
-    setPw("");
-    setPw2("");
+    setPw(""); setPw2("");
     setScreen("dashboard");
   };
 
-  const tryLogin = async () => {
+  // ── Login with seed phrase (works on any device) ──
+  const tryLoginWithSeed = async () => {
     setErr(null);
-    if (!stored && loginMode === "password") {
-      setErr("No wallet on this device. Login with seed phrase instead.");
+    const normalized = loginSeedTxt.trim().toLowerCase().split(/\s+/).join(" ");
+    const words = normalized.split(" ").filter(Boolean);
+    if (words.length !== 12) {
+      setErr("Seed phrase must be exactly 12 words");
       return;
     }
-    if (loginMode === "password") {
-      const h = await sha256Hex(loginPw);
-      if (h !== stored!.passwordHash) {
-        setErr("Invalid password");
-        return;
-      }
-      setLoginPw("");
-      setScreen("dashboard");
-    } else {
-      const normalized = loginSeedTxt.trim().toLowerCase().split(/\s+/).join(" ");
-      const words = normalized.split(" ").filter(Boolean);
-      if (words.length !== 12) {
-        setErr("Seed phrase must be exactly 12 words");
-        return;
-      }
-      const w = loadWallet();
-      if (!w || w.seed.trim().toLowerCase() !== normalized) {
-        setErr("Seed does not match the wallet stored on this device");
-        return;
-      }
+    setBusy(true);
+    try {
+      // Ask the node to derive the address from the seed
+      const d = await api.getSeedPhrase();
+      // We can't re-derive from seed via API, so we do it via /wallet/from-seed
+      const res = await fetch(`${(await import("@/config/api")).API_BASE}/wallet/from-seed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ seed_phrase: normalized }),
+      });
+      if (!res.ok) throw new Error("Cannot derive address from seed");
+      const data = await res.json() as { address: string };
+      setActiveAddress(data.address);
+      setActiveSeed(normalized);
+      // Save to localStorage for quick access next time
+      const w: StoredWallet = { address: data.address, passwordHash: "" };
+      localStorage.setItem(LS_KEY, JSON.stringify(w));
       setStored(w);
       setLoginSeedTxt("");
       setScreen("dashboard");
+    } catch {
+      setErr("Could not derive address from seed. Check your seed phrase and try again.");
+    } finally {
+      setBusy(false);
     }
   };
 
+  // ── Login with password (same device only) ──
+  const tryLoginWithPassword = async () => {
+    setErr(null);
+    if (!stored) { setErr("No wallet on this device. Use seed phrase instead."); return; }
+    const h = await sha256Hex(loginPw);
+    if (h !== stored.passwordHash) { setErr("Invalid password"); return; }
+    setLoginPw("");
+    setActiveAddress(stored.address);
+    setScreen("dashboard");
+  };
+
   const lock = () => {
-    setBalance("—");
-    setTxs(null);
+    setBalance("—"); setTxs(null); setActiveSeed(null);
     setScreen("locked");
   };
 
   const logout = () => {
     localStorage.removeItem(LS_KEY);
-    setStored(null);
-    setLoginPw("");
-    setLoginSeedTxt("");
+    setStored(null); setActiveSeed(null); setActiveAddress(null);
+    setLoginPw(""); setLoginSeedTxt("");
     setScreen("landing");
   };
 
@@ -262,29 +273,24 @@ export function Wallet() {
           <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             $ hashlatch-cli wallet
           </div>
-          <h2 className="mb-8 text-2xl font-bold">HashLatch Wallet</h2>
+          <h2 className="mb-2 text-2xl font-bold">HashLatch Wallet</h2>
+          <p className="mb-8 font-mono text-xs text-muted-foreground">
+            Your seed phrase = your wallet. Works on any device, anytime.
+          </p>
           <button
             onClick={startCreate}
             disabled={busy}
             className="mx-auto inline-flex items-center gap-2 rounded-md border-2 border-primary bg-background px-10 py-4 font-mono text-base font-semibold text-primary transition-all hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_40px_color-mix(in_oklab,var(--primary)_55%,transparent)] disabled:opacity-50"
           >
-            {busy ? (
-              <>
-                <Loader2 size={18} className="animate-spin" /> Generating…
-              </>
-            ) : (
-              "Create New Wallet"
-            )}
+            {busy ? <><Loader2 size={18} className="animate-spin" /> Generating…</> : "Create New Wallet"}
           </button>
           <div className="mt-6">
             <button
-              onClick={() => {
-                setErr(null);
-                setScreen("login");
-              }}
+              onClick={() => { setErr(null); setLoginMode("seed"); setScreen("login-seed"); }}
               className="rounded-md border border-border px-6 py-2 font-mono text-sm text-muted-foreground hover:border-primary/60 hover:text-primary"
             >
-              Login
+              <KeyRound size={12} className="mr-1 inline" />
+              Login with Seed Phrase
             </button>
           </div>
           {err && (
@@ -292,6 +298,9 @@ export function Wallet() {
               {err}
             </div>
           )}
+        </div>
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 font-mono text-xs text-primary">
+          ℹ Your 12-word seed phrase is the only key to your wallet. Save it safely — it works on any device, anytime. Never share it with anyone.
         </div>
       </div>
     );
@@ -323,27 +332,19 @@ export function Wallet() {
           </div>
           <div className="grid grid-cols-3 gap-2 md:grid-cols-4">
             {words.map((w, i) => (
-              <div
-                key={i}
-                className="rounded-md border border-border bg-background/60 px-3 py-2 font-mono text-sm"
-              >
-                <span className="mr-2 text-[10px] text-muted-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+              <div key={i} className="rounded-md border border-border bg-background/60 px-3 py-2 font-mono text-sm">
+                <span className="mr-2 text-[10px] text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
                 {w}
               </div>
             ))}
           </div>
-          <div className="mt-4 rounded-md border border-primary/40 bg-primary/5 p-3 font-mono text-xs text-primary">
-            ⚠ Save these words in a safe place. You will lose access to your wallet without them.
+          <div className="mt-4 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 font-mono text-xs text-yellow-400">
+            ⚠ Write these 12 words down on paper and store safely. This is the ONLY way to recover your wallet on any device. The app does NOT store your seed phrase.
           </div>
         </div>
 
         <button
-          onClick={() => {
-            setErr(null);
-            setScreen("create-password");
-          }}
+          onClick={() => { setErr(null); setScreen("create-password"); }}
           className="w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground hover:shadow-[0_0_30px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
         >
           I've Saved My Seed Phrase → Set Password
@@ -360,7 +361,10 @@ export function Wallet() {
           <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             $ hashlatch-cli wallet --set-password
           </div>
-          <h2 className="mb-5 text-xl font-bold">Set Wallet Password</h2>
+          <h2 className="mb-2 text-xl font-bold">Set Wallet Password</h2>
+          <p className="mb-5 font-mono text-xs text-muted-foreground">
+            Password unlocks your wallet on this device only. On another device, use your seed phrase.
+          </p>
           <input
             type="password"
             value={pw}
@@ -373,6 +377,7 @@ export function Wallet() {
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
             placeholder="Confirm password"
+            onKeyDown={(e) => e.key === "Enter" && confirmPassword()}
             className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
           />
           <button
@@ -391,104 +396,175 @@ export function Wallet() {
     );
   }
 
-  // ═══════════ LOGIN / LOCKED ═══════════
-  if (screen === "login" || screen === "locked") {
+  // ═══════════ LOGIN WITH SEED (any device) ═══════════
+  if (screen === "login-seed") {
+    return (
+      <div className="mx-auto max-w-xl space-y-6">
+        <div className="glass rounded-2xl p-8">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            $ hashlatch-cli wallet --recover
+          </div>
+          <h2 className="mb-2 text-xl font-bold">Recover Wallet</h2>
+          <p className="mb-5 font-mono text-xs text-muted-foreground">
+            Enter your 12-word seed phrase to access your wallet on any device.
+          </p>
+
+          {stored && (
+            <div className="mb-4 inline-flex w-full rounded-md border border-border p-1 font-mono text-[11px]">
+              <button
+                onClick={() => { setErr(null); setLoginMode("password"); }}
+                className={`flex-1 rounded px-3 py-1 ${loginMode === "password" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                Password (this device)
+              </button>
+              <button
+                onClick={() => { setErr(null); setLoginMode("seed"); }}
+                className={`flex-1 rounded px-3 py-1 ${loginMode === "seed" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                Seed Phrase (any device)
+              </button>
+            </div>
+          )}
+
+          {loginMode === "seed" || !stored ? (
+            <>
+              <textarea
+                value={loginSeedTxt}
+                onChange={(e) => setLoginSeedTxt(e.target.value)}
+                placeholder="word1 word2 word3 ... word12"
+                rows={3}
+                className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
+              />
+              <button
+                onClick={tryLoginWithSeed}
+                disabled={busy}
+                className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Recovering…</> : "Recover Wallet"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="mb-2 font-mono text-xs text-muted-foreground">
+                Wallet address: <code className="text-primary">{stored.address}</code>
+              </div>
+              <input
+                type="password"
+                value={loginPw}
+                onChange={(e) => setLoginPw(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && tryLoginWithPassword()}
+                placeholder="Password"
+                className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
+              />
+              <button
+                onClick={tryLoginWithPassword}
+                className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground"
+              >
+                Unlock
+              </button>
+            </>
+          )}
+
+          {err && (
+            <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 font-mono text-xs text-destructive">
+              {err}
+            </div>
+          )}
+          <button
+            onClick={() => { setErr(null); setScreen("landing"); }}
+            className="mt-4 w-full font-mono text-[11px] text-muted-foreground underline hover:text-primary"
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════ LOCKED ═══════════
+  if (screen === "locked") {
     return (
       <div className="mx-auto max-w-xl space-y-6">
         <div className="glass rounded-2xl p-8">
           <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             $ hashlatch-cli wallet --unlock
           </div>
-          <h2 className="mb-4 text-xl font-bold">
-            {screen === "locked" ? "Wallet Locked" : "Login"}
-          </h2>
+          <h2 className="mb-4 text-xl font-bold">Wallet Locked</h2>
+          {stored && (
+            <div className="mb-4 font-mono text-xs text-muted-foreground">
+              Address: <code className="text-primary break-all">{stored.address}</code>
+            </div>
+          )}
 
-          <div className="mb-4 inline-flex rounded-md border border-border p-1 font-mono text-[11px]">
+          <div className="mb-4 inline-flex w-full rounded-md border border-border p-1 font-mono text-[11px]">
             <button
-              onClick={() => {
-                setErr(null);
-                setLoginMode("password");
-              }}
-              className={`rounded px-3 py-1 ${
-                loginMode === "password"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
+              onClick={() => { setErr(null); setLoginMode("password"); }}
+              className={`flex-1 rounded px-3 py-1 ${loginMode === "password" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
-              Login with Password
+              Password
             </button>
             <button
-              onClick={() => {
-                setErr(null);
-                setLoginMode("seed");
-              }}
-              className={`rounded px-3 py-1 ${
-                loginMode === "seed"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
+              onClick={() => { setErr(null); setLoginMode("seed"); }}
+              className={`flex-1 rounded px-3 py-1 ${loginMode === "seed" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
-              Login with Seed
+              Seed Phrase
             </button>
           </div>
 
           {loginMode === "password" ? (
-            <input
-              type="password"
-              value={loginPw}
-              onChange={(e) => setLoginPw(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && tryLogin()}
-              placeholder="Password"
-              className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
-            />
+            <>
+              <input
+                type="password"
+                value={loginPw}
+                onChange={(e) => setLoginPw(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && tryLoginWithPassword()}
+                placeholder="Password"
+                className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
+              />
+              <button
+                onClick={tryLoginWithPassword}
+                className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground"
+              >
+                Unlock
+              </button>
+            </>
           ) : (
-            <textarea
-              value={loginSeedTxt}
-              onChange={(e) => setLoginSeedTxt(e.target.value)}
-              placeholder="word1 word2 word3 ... word12"
-              rows={3}
-              className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
-            />
+            <>
+              <textarea
+                value={loginSeedTxt}
+                onChange={(e) => setLoginSeedTxt(e.target.value)}
+                placeholder="word1 word2 word3 ... word12"
+                rows={3}
+                className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
+              />
+              <button
+                onClick={tryLoginWithSeed}
+                disabled={busy}
+                className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Recovering…</> : "Recover Wallet"}
+              </button>
+            </>
           )}
 
-          <button
-            onClick={tryLogin}
-            className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground hover:shadow-[0_0_30px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
-          >
-            Unlock
-          </button>
           {err && (
             <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 font-mono text-xs text-destructive">
               {err}
             </div>
           )}
-
-          {screen === "login" && (
-            <button
-              onClick={() => {
-                setErr(null);
-                setScreen("landing");
-              }}
-              className="mt-4 w-full font-mono text-[11px] text-muted-foreground underline hover:text-primary"
-            >
-              ← Back
-            </button>
-          )}
-          {screen === "locked" && (
-            <button
-              onClick={logout}
-              className="mt-4 w-full font-mono text-[11px] text-muted-foreground underline hover:text-destructive"
-            >
-              Forget this wallet (clear local storage)
-            </button>
-          )}
+          <button
+            onClick={logout}
+            className="mt-4 w-full font-mono text-[11px] text-muted-foreground underline hover:text-destructive"
+          >
+            Forget this wallet (clear local data)
+          </button>
         </div>
       </div>
     );
   }
 
   // ═══════════ DASHBOARD ═══════════
-  if (screen === "dashboard" && stored) {
+  if (screen === "dashboard" && activeAddress) {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="glass rounded-2xl p-6">
@@ -502,14 +578,10 @@ export function Wallet() {
               Connected
             </div>
           </div>
-          <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-primary">
-            address
-          </div>
+          <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-primary">address</div>
           <div className="flex items-start justify-between gap-3">
-            <code className="break-all font-mono text-xs text-foreground/90 md:text-sm">
-              {stored.address}
-            </code>
-            <CopyBtn value={stored.address} />
+            <code className="break-all font-mono text-xs text-foreground/90 md:text-sm">{activeAddress}</code>
+            <CopyBtn value={activeAddress} />
           </div>
         </div>
 
@@ -519,7 +591,7 @@ export function Wallet() {
               balance · auto-refresh 30s
             </div>
             <button
-              onClick={() => fetchBalance(stored.address)}
+              onClick={() => fetchBalance(activeAddress)}
               disabled={balLoading}
               className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground hover:text-primary"
             >
@@ -534,12 +606,7 @@ export function Wallet() {
           ) : balErr ? (
             <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 font-mono text-xs text-destructive">
               ⚠ Cannot connect to HashLatch node
-              <button
-                onClick={() => fetchBalance(stored.address)}
-                className="ml-2 underline"
-              >
-                retry
-              </button>
+              <button onClick={() => fetchBalance(activeAddress)} className="ml-2 underline">retry</button>
             </div>
           ) : (
             <div className="text-glow font-mono text-3xl font-bold text-primary md:text-4xl">
@@ -564,27 +631,18 @@ export function Wallet() {
         </div>
 
         <div className="glass rounded-2xl p-6">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-primary">
-            recent transactions
-          </div>
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-primary">recent transactions</div>
           {txs === null ? (
             <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
               <Loader2 size={12} className="animate-spin" /> loading…
             </div>
           ) : txs.length === 0 ? (
-            <div className="font-mono text-xs text-muted-foreground">
-              No transactions yet
-            </div>
+            <div className="font-mono text-xs text-muted-foreground">No transactions yet</div>
           ) : (
             <ul className="divide-y divide-border/60">
               {txs.map((t, i) => (
-                <li
-                  key={(t.txid as string) ?? i}
-                  className="flex items-center justify-between gap-3 py-2 font-mono text-xs"
-                >
-                  <code className="truncate text-muted-foreground">
-                    {(t.txid as string) ?? "—"}
-                  </code>
+                <li key={(t.txid as string) ?? i} className="flex items-center justify-between gap-3 py-2 font-mono text-xs">
+                  <code className="truncate text-muted-foreground">{(t.txid as string) ?? "—"}</code>
                   <span className="text-primary">{String(t.amount ?? "")}</span>
                 </li>
               ))}
@@ -609,25 +667,18 @@ export function Wallet() {
 
         {sendOpen && (
           <SendModal
-            from={stored.address}
-            seed={stored.seed}
+            from={activeAddress}
+            seed={activeSeed ?? ""}
             onClose={() => setSendOpen(false)}
-            onDone={() => {
-              setSendOpen(false);
-              fetchBalance(stored.address);
-              fetchTxs(stored.address);
-            }}
+            onDone={() => { setSendOpen(false); fetchBalance(activeAddress); fetchTxs(activeAddress); }}
           />
         )}
         {bountyOpen && (
           <BountyModal
-            from={stored.address}
-            seed={stored.seed}
+            from={activeAddress}
+            seed={activeSeed ?? ""}
             onClose={() => setBountyOpen(false)}
-            onDone={() => {
-              setBountyOpen(false);
-              fetchBalance(stored.address);
-            }}
+            onDone={() => { setBountyOpen(false); fetchBalance(activeAddress); }}
           />
         )}
       </div>
@@ -637,29 +688,13 @@ export function Wallet() {
   return null;
 }
 
-// ─────────── Modals ───────────
-
-function ModalShell({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur">
       <div className="glass w-full max-w-md rounded-2xl border-primary/40 p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-primary">
-            {title}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
-            aria-label="Close"
-          >
+          <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-primary">{title}</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X size={16} />
           </button>
         </div>
@@ -669,17 +704,7 @@ function ModalShell({
   );
 }
 
-function SendModal({
-  from,
-  seed,
-  onClose,
-  onDone,
-}: {
-  from: string;
-  seed: string;
-  onClose: () => void;
-  onDone: () => void;
-}) {
+function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string; onClose: () => void; onDone: () => void }) {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
@@ -687,10 +712,7 @@ function SendModal({
   const submit = async () => {
     setErr(null);
     const n = Number(amount);
-    if (!to.trim() || !Number.isFinite(n) || n <= 0) {
-      setErr("Provide a valid recipient and amount");
-      return;
-    }
+    if (!to.trim() || !Number.isFinite(n) || n <= 0) { setErr("Provide a valid recipient and amount"); return; }
     setBusy(true);
     try {
       await api.send({ from, to: to.trim(), amount: n, seed });
@@ -703,46 +725,20 @@ function SendModal({
   };
   return (
     <ModalShell title="Send HLC" onClose={onClose}>
-      <input
-        value={to}
-        onChange={(e) => setTo(e.target.value)}
-        placeholder="Recipient address"
-        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-      />
-      <input
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Amount (HLC)"
-        inputMode="decimal"
-        className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-      />
-      {err && (
-        <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">
-          {err}
-        </div>
-      )}
-      <button
-        onClick={submit}
-        disabled={busy}
-        className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50"
-      >
+      <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="Recipient address"
+        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
+      <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (HLC)" inputMode="decimal"
+        className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
+      {err && <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
+      <button onClick={submit} disabled={busy}
+        className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50">
         {busy ? "Broadcasting…" : "Send"}
       </button>
     </ModalShell>
   );
 }
 
-function BountyModal({
-  from,
-  seed,
-  onClose,
-  onDone,
-}: {
-  from: string;
-  seed: string;
-  onClose: () => void;
-  onDone: () => void;
-}) {
+function BountyModal({ from, seed, onClose, onDone }: { from: string; seed: string; onClose: () => void; onDone: () => void }) {
   const [targetHash, setTargetHash] = useState("");
   const [amount, setAmount] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -753,18 +749,11 @@ function BountyModal({
     const a = Number(amount);
     const d = Number(deadline);
     if (!targetHash.trim() || !Number.isFinite(a) || a <= 0 || !Number.isFinite(d)) {
-      setErr("Provide target hash, amount and deadline (blocks/unix)");
-      return;
+      setErr("Provide target hash, amount and deadline"); return;
     }
     setBusy(true);
     try {
-      await api.createBounty({
-        from,
-        seed,
-        target_hash: targetHash.trim(),
-        amount: a,
-        deadline: d,
-      });
+      await api.createBounty({ from, seed, target_hash: targetHash.trim(), amount: a, deadline: d });
       onDone();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Bounty creation failed");
@@ -774,36 +763,15 @@ function BountyModal({
   };
   return (
     <ModalShell title="Create Bounty" onClose={onClose}>
-      <input
-        value={targetHash}
-        onChange={(e) => setTargetHash(e.target.value)}
-        placeholder="target_hash (SHA-256 hex)"
-        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-      />
-      <input
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Amount (HLC)"
-        inputMode="decimal"
-        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-      />
-      <input
-        value={deadline}
-        onChange={(e) => setDeadline(e.target.value)}
-        placeholder="Deadline (block height or unix ts)"
-        inputMode="numeric"
-        className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-      />
-      {err && (
-        <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">
-          {err}
-        </div>
-      )}
-      <button
-        onClick={submit}
-        disabled={busy}
-        className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50"
-      >
+      <input value={targetHash} onChange={(e) => setTargetHash(e.target.value)} placeholder="target_hash (SHA-256 hex)"
+        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
+      <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (HLC)" inputMode="decimal"
+        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
+      <input value={deadline} onChange={(e) => setDeadline(e.target.value)} placeholder="Deadline (block height)" inputMode="numeric"
+        className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
+      {err && <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
+      <button onClick={submit} disabled={busy}
+        className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50">
         {busy ? "Broadcasting…" : "Create Bounty"}
       </button>
     </ModalShell>
