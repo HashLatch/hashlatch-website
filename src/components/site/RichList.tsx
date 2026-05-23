@@ -26,6 +26,9 @@ export const RichList = () => {
       }
     };
     fetchWallets();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchWallets, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

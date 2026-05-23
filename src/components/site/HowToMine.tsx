@@ -133,14 +133,22 @@ export function HowToMine() {
           </div>
           <Copyable text={MINER_CMD} />
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="https://raw.githubusercontent.com/HashLatch/PoWH/master/miners/start-mining-windows.bat"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-primary px-4 py-3 font-mono text-xs text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              <Download size={14} /> Download Windows .bat
-            </a>
+            <div className="flex flex-col flex-1 gap-2">
+              <a
+                href="https://raw.githubusercontent.com/HashLatch/PoWH/master/miners/start-mining-windows.bat"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-3 font-mono text-xs text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <Download size={14} /> Download Windows .bat
+              </a>
+              <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 px-3 py-2">
+                <span className="text-yellow-400 text-xs">⚠</span>
+                <span className="font-mono text-[10px] text-yellow-400">
+                  Run as Administrator — right-click the .bat file and select "Run as administrator"
+                </span>
+              </div>
+            </div>
             <a
               href="https://raw.githubusercontent.com/HashLatch/PoWH/master/miners/start-mining-linux.sh"
               target="_blank"
