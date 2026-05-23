@@ -4,6 +4,9 @@ import { Footer } from '@/components/site/Sections';
 import { RichList } from '@/components/site/RichList';
 
 export const Route = createFileRoute('/top-wallets')({
+  head: () => ({
+    meta: [{ title: "Top Wallets — HashLatch (HLC)" }],
+  }),
   component: TopWalletsPage,
 });
 
