@@ -13,11 +13,16 @@ export const RichList = () => {
         const response = await fetch('https://explorer.hashlatch.online/api/richlist');
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
+        const DEV_ADDRESS = 'cdqPc3nxWHHSXFTadV5hVFRHGGeyuH6Mh8';
         const walletList = Array.isArray(data) ? data : data.addresses || data.data || [];
         const validWallets = walletList.filter((w: any) => w.address !== "coinbase" && w.a !== "coinbase" && !isNaN(Number(w.balance || w.b)));
         const sorted = validWallets.sort((a: any, b: any) => (b.balance || b.b) - (a.balance || a.a));
-        setAllWallets(sorted);
-        setDisplayedWallets(sorted.slice(0, 100));
+        const labeled = sorted.map((w: any) => ({
+          ...w,
+          label: w.address === DEV_ADDRESS ? '🔧 Dev Fee Wallet' : undefined
+        }));
+        setAllWallets(labeled);
+        setDisplayedWallets(labeled.slice(0, 100));
       } catch (err: any) {
         console.error(err);
         setError("Cannot connect to the explorer. Please check network or CORS settings.");
@@ -68,7 +73,10 @@ export const RichList = () => {
             {displayedWallets.map((wallet, idx) => (
               <tr key={idx} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
                 <td className="p-4 font-mono text-sm text-muted-foreground">{idx + 1}</td>
-                <td className="p-4 font-mono text-sm text-primary">{wallet.address || wallet.a}</td>
+                <td className="p-4 font-mono text-sm text-primary">
+                  {wallet.address || wallet.a}
+                  {wallet.label && <span className="ml-2 text-xs text-yellow-500 font-sans">{wallet.label}</span>}
+                </td>
                 <td className="p-4 font-mono text-sm">{Number(wallet.balance || wallet.b).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 4})} HLC</td>
               </tr>
             ))}
