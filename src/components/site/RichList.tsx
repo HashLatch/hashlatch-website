@@ -10,7 +10,7 @@ export const RichList = () => {
   useEffect(() => {
     const fetchWallets = async () => {
       try {
-        const response = await fetch('https://explorer.hashlatch.online/ext/richlist');
+        const response = await fetch('https://explorer.hashlatch.online/api/richlist');
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
         const walletList = Array.isArray(data) ? data : data.addresses || data.data || [];
