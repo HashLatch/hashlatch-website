@@ -69,7 +69,7 @@ export const RichList = () => {
               <tr key={idx} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
                 <td className="p-4 font-mono text-sm text-muted-foreground">{idx + 1}</td>
                 <td className="p-4 font-mono text-sm text-primary">{wallet.address || wallet.a}</td>
-                <td className="p-4 font-mono text-sm">{(Number(wallet.balance || wallet.b) / 100000000).toLocaleString("en-US")} HLC</td>
+                <td className="p-4 font-mono text-sm">{Number(wallet.balance || wallet.b).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 4})} HLC</td>
               </tr>
             ))}
             {displayedWallets.length === 0 && (
