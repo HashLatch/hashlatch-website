@@ -55,6 +55,7 @@ type Screen =
   | "create-reveal"
   | "create-password"
   | "login-seed"
+  | "login-wif"
   | "locked"
   | "dashboard";
 
@@ -82,6 +83,7 @@ export function Wallet() {
 
   // login with seed
   const [loginSeedTxt, setLoginSeedTxt] = useState("");
+  const [loginWifTxt, setLoginWifTxt] = useState("");
   const [loginPw, setLoginPw] = useState("");
   const [loginMode, setLoginMode] = useState<"seed" | "password">("seed");
 
@@ -242,6 +244,36 @@ export function Wallet() {
     }
   };
 
+  // ── Login with WIF private key (works on any device) ──
+  const tryLoginWithWif = async () => {
+    setErr(null);
+    const wif = loginWifTxt.trim();
+    if (wif.length < 50 || wif.length > 55) {
+      setErr("Invalid private key (WIF) format");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch(`${(await import("@/config/api")).API_BASE}/wallet/from-wif`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wif }),
+      });
+      if (!res.ok) throw new Error("Cannot derive address from WIF");
+      const data = await res.json() as { address: string };
+      setActiveAddress(data.address);
+      const w: StoredWallet = { address: data.address, passwordHash: "" };
+      localStorage.setItem(LS_KEY, JSON.stringify(w));
+      setStored(w);
+      setLoginWifTxt("");
+      setScreen("dashboard");
+    } catch {
+      setErr("Could not find wallet for this private key. Make sure it was created on this network.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ── Login with password (same device only) ──
   const tryLoginWithPassword = async () => {
     setErr(null);
@@ -291,6 +323,15 @@ export function Wallet() {
             >
               <KeyRound size={12} className="mr-1 inline" />
               Login with Seed Phrase
+            </button>
+          </div>
+          <div className="mt-3">
+            <button
+              onClick={() => { setErr(null); setScreen("login-wif"); }}
+              className="rounded-md border border-border px-6 py-2 font-mono text-sm text-muted-foreground hover:border-primary/60 hover:text-primary"
+            >
+              <KeyRound size={12} className="mr-1 inline" />
+              Import with Private Key (WIF)
             </button>
           </div>
           {err && (
@@ -481,7 +522,48 @@ export function Wallet() {
     );
   }
 
-  // ═══════════ LOCKED ═══════════
+  // ═══════════ LOGIN WITH WIF ═══════════
+  if (screen === "login-wif") {
+    return (
+      <div className="mx-auto max-w-xl space-y-6">
+        <div className="glass rounded-2xl p-8">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            $ hashlatch-cli wallet --import-key
+          </div>
+          <h2 className="mb-2 text-xl font-bold">Import with Private Key</h2>
+          <p className="mb-5 font-mono text-xs text-muted-foreground">
+            Enter your private key (WIF) to access a wallet on any device.
+          </p>
+          <input
+            type="text"
+            value={loginWifTxt}
+            onChange={(e) => setLoginWifTxt(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && tryLoginWithWif()}
+            placeholder="Private key (starts with U or L)"
+            className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-sm outline-none focus:border-primary"
+          />
+          <button
+            onClick={tryLoginWithWif}
+            disabled={busy}
+            className="mt-3 w-full rounded-md bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
+            {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Importing…</> : "Import Wallet"}
+          </button>
+          {err && (
+            <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 font-mono text-xs text-destructive">
+              {err}
+            </div>
+          )}
+          <button
+            onClick={() => { setErr(null); setScreen("landing"); }}
+            className="mt-4 w-full font-mono text-[11px] text-muted-foreground underline hover:text-primary"
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (screen === "locked") {
     return (
       <div className="mx-auto max-w-xl space-y-6">
