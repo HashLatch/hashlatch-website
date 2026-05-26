@@ -12,6 +12,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { api, sha256Hex } from "@/lib/hashlatch-api";
+import { generateWallet, walletFromMnemonic, walletFromWIF } from "@/lib/hlc-wallet";
 
 // Wallet is seed-phrase first. localStorage only stores address + passwordHash
 // (never the seed itself after setup). Seed phrase works on ANY device.
@@ -170,23 +171,18 @@ export function Wallet() {
     return () => clearInterval(id);
   }, [screen, activeAddress, fetchBalance, fetchTxs]);
 
-  // ── Create new wallet ──
+  // ── Create new wallet (100% in browser, non-custodial) ──
   const startCreate = async () => {
     setBusy(true);
     setErr(null);
     try {
-      const d = await api.getSeedPhrase();
-      setDraftSeed({
-        address: d.address,
-        seed: d.seed_phrase ?? ((d as Record<string, unknown>).seed as string),
-      });
+      // Generate the seed and keys entirely client-side. The server never
+      // sees the mnemonic or private key.
+      const w = generateWallet();
+      setDraftSeed({ address: w.address, seed: w.mnemonic });
       setScreen("create-reveal");
     } catch (e) {
-      setErr(
-        e instanceof Error && e.message.includes("timed out")
-          ? "Request timed out"
-          : "⚠ Cannot connect to HashLatch node",
-      );
+      setErr(e instanceof Error ? e.message : "Could not generate wallet");
     } finally {
       setBusy(false);
     }
@@ -208,7 +204,7 @@ export function Wallet() {
     setScreen("dashboard");
   };
 
-  // ── Login with seed phrase (works on any device) ──
+  // ── Login with seed phrase (derived in browser, any device) ──
   const tryLoginWithSeed = async () => {
     setErr(null);
     const normalized = loginSeedTxt.trim().toLowerCase().split(/\s+/).join(" ");
@@ -219,32 +215,23 @@ export function Wallet() {
     }
     setBusy(true);
     try {
-      // Ask the node to derive the address from the seed
-      const d = await api.getSeedPhrase();
-      // We can't re-derive from seed via API, so we do it via /wallet/from-seed
-      const res = await fetch(`${(await import("@/config/api")).API_BASE}/wallet/from-seed`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seed_phrase: normalized }),
-      });
-      if (!res.ok) throw new Error("Cannot derive address from seed");
-      const data = await res.json() as { address: string };
-      setActiveAddress(data.address);
+      // Derive address from the seed locally — no server call, no key exposure.
+      const w = walletFromMnemonic(normalized);
+      setActiveAddress(w.address);
       setActiveSeed(normalized);
-      // Save to localStorage for quick access next time
-      const w: StoredWallet = { address: data.address, passwordHash: "" };
-      localStorage.setItem(LS_KEY, JSON.stringify(w));
-      setStored(w);
+      const sw: StoredWallet = { address: w.address, passwordHash: "" };
+      localStorage.setItem(LS_KEY, JSON.stringify(sw));
+      setStored(sw);
       setLoginSeedTxt("");
       setScreen("dashboard");
     } catch {
-      setErr("Could not derive address from seed. Check your seed phrase and try again.");
+      setErr("Could not derive address. Check your 12-word phrase and try again.");
     } finally {
       setBusy(false);
     }
   };
 
-  // ── Login with WIF private key (works on any device) ──
+  // ── Login with WIF private key (derived in browser, any device) ──
   const tryLoginWithWif = async () => {
     setErr(null);
     const wif = loginWifTxt.trim();
@@ -254,21 +241,16 @@ export function Wallet() {
     }
     setBusy(true);
     try {
-      const res = await fetch(`${(await import("@/config/api")).API_BASE}/wallet/from-wif`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wif }),
-      });
-      if (!res.ok) throw new Error("Cannot derive address from WIF");
-      const data = await res.json() as { address: string };
-      setActiveAddress(data.address);
-      const w: StoredWallet = { address: data.address, passwordHash: "" };
-      localStorage.setItem(LS_KEY, JSON.stringify(w));
-      setStored(w);
+      // Derive the address from the WIF locally — key never leaves the browser.
+      const w = walletFromWIF(wif);
+      setActiveAddress(w.address);
+      const sw: StoredWallet = { address: w.address, passwordHash: "" };
+      localStorage.setItem(LS_KEY, JSON.stringify(sw));
+      setStored(sw);
       setLoginWifTxt("");
       setScreen("dashboard");
     } catch {
-      setErr("Could not find wallet for this private key. Make sure it was created on this network.");
+      setErr("Invalid private key (WIF). Please check and try again.");
     } finally {
       setBusy(false);
     }

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhitepaperRouteImport } from './routes/whitepaper'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as TopWalletsRouteImport } from './routes/top-wallets'
 import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as DecoderRouteImport } from './routes/decoder'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const WhitepaperRoute = WhitepaperRouteImport.update({
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopWalletsRoute = TopWalletsRouteImport.update({
+  id: '/top-wallets',
+  path: '/top-wallets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SimulatorRoute = SimulatorRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/decoder': typeof DecoderRoute
   '/simulator': typeof SimulatorRoute
+  '/top-wallets': typeof TopWalletsRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/decoder': typeof DecoderRoute
   '/simulator': typeof SimulatorRoute
+  '/top-wallets': typeof TopWalletsRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
 }
@@ -60,21 +68,42 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/decoder': typeof DecoderRoute
   '/simulator': typeof SimulatorRoute
+  '/top-wallets': typeof TopWalletsRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/decoder' | '/simulator' | '/wallet' | '/whitepaper'
+  fullPaths:
+    | '/'
+    | '/decoder'
+    | '/simulator'
+    | '/top-wallets'
+    | '/wallet'
+    | '/whitepaper'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/decoder' | '/simulator' | '/wallet' | '/whitepaper'
-  id: '__root__' | '/' | '/decoder' | '/simulator' | '/wallet' | '/whitepaper'
+  to:
+    | '/'
+    | '/decoder'
+    | '/simulator'
+    | '/top-wallets'
+    | '/wallet'
+    | '/whitepaper'
+  id:
+    | '__root__'
+    | '/'
+    | '/decoder'
+    | '/simulator'
+    | '/top-wallets'
+    | '/wallet'
+    | '/whitepaper'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DecoderRoute: typeof DecoderRoute
   SimulatorRoute: typeof SimulatorRoute
+  TopWalletsRoute: typeof TopWalletsRoute
   WalletRoute: typeof WalletRoute
   WhitepaperRoute: typeof WhitepaperRoute
 }
@@ -93,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/top-wallets': {
+      id: '/top-wallets'
+      path: '/top-wallets'
+      fullPath: '/top-wallets'
+      preLoaderRoute: typeof TopWalletsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/simulator': {
@@ -123,9 +159,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DecoderRoute: DecoderRoute,
   SimulatorRoute: SimulatorRoute,
+  TopWalletsRoute: TopWalletsRoute,
   WalletRoute: WalletRoute,
   WhitepaperRoute: WhitepaperRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
