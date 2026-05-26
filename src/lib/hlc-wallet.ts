@@ -1,31 +1,20 @@
-// HashLatch (HLC) non-custodial wallet — all key material stays in the browser.
-// The server NEVER sees the seed phrase or private key.
+// HashLatch (HLC) non-custodial wallet — pure browser crypto, no Node Buffer.
+// All key material stays in the browser. The server NEVER sees seeds/keys.
 //
-// Network parameters (from chainparams.cpp):
+// Network parameters (chainparams.cpp):
 //   PUBKEY_ADDRESS = 88   (addresses start with "c")
 //   SECRET_KEY     = 188  (WIF starts with "U"/"L")
 
-import * as bip39 from "bip39";
-import { BIP32Factory } from "bip32";
-import * as bitcoin from "bitcoinjs-lib";
-import { ECPairFactory } from "ecpair";
-import * as ecc from "@bitcoinerlab/secp256k1";
+import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
+import { HDKey } from "@scure/bip32";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import { sha256 } from "@noble/hashes/sha256";
+import { ripemd160 } from "@noble/hashes/ripemd160";
+import bs58check from "bs58check";
 
-const ECPair = ECPairFactory(ecc);
-const bip32 = BIP32Factory(ecc);
-
-// HashLatch network definition for bitcoinjs-lib
-export const HLC_NETWORK: bitcoin.networks.Network = {
-  messagePrefix: "\x18HashLatch Signed Message:\n",
-  bech32: "hlc", // unused (no segwit addresses on HLC)
-  bip32: {
-    public: 0x04882676,
-    private: 0x04884567,
-  },
-  pubKeyHash: 88,   // 'c' addresses
-  scriptHash: 33,
-  wif: 188,
-};
+const PUBKEY_VERSION = 88;
+const WIF_VERSION = 188;
 
 export interface HlcWallet {
   address: string;
@@ -33,42 +22,57 @@ export interface HlcWallet {
   mnemonic: string;
 }
 
-// Generate a brand-new wallet entirely in the browser.
+function hash160(data: Uint8Array): Uint8Array {
+  return ripemd160(sha256(data));
+}
+
+function pubkeyToAddress(pubkey: Uint8Array): string {
+  const h = hash160(pubkey);
+  const payload = new Uint8Array(1 + h.length);
+  payload[0] = PUBKEY_VERSION;
+  payload.set(h, 1);
+  return bs58check.encode(payload);
+}
+
+function privkeyToWIF(priv: Uint8Array): string {
+  const payload = new Uint8Array(1 + priv.length + 1);
+  payload[0] = WIF_VERSION;
+  payload.set(priv, 1);
+  payload[1 + priv.length] = 0x01;
+  return bs58check.encode(payload);
+}
+
+function wifToPrivkey(wif: string): Uint8Array {
+  const decoded = bs58check.decode(wif.trim());
+  if (decoded[0] !== WIF_VERSION) throw new Error("Wrong network WIF");
+  let priv = decoded.slice(1);
+  if (priv.length === 33 && priv[32] === 0x01) priv = priv.slice(0, 32);
+  return priv;
+}
+
 export function generateWallet(): HlcWallet {
-  const mnemonic = bip39.generateMnemonic(128); // 12 words
+  const mnemonic = generateMnemonic(wordlist, 128);
   return walletFromMnemonic(mnemonic);
 }
 
-// Derive the wallet (address + WIF) from a 12-word mnemonic.
-// Uses BIP44-style path m/44'/175'/0'/0/0 (175 is a HLC-chosen coin type).
 export function walletFromMnemonic(mnemonic: string): HlcWallet {
   const normalized = mnemonic.trim().toLowerCase().split(/\s+/).join(" ");
-  if (!bip39.validateMnemonic(normalized)) {
+  if (!validateMnemonic(normalized, wordlist)) {
     throw new Error("Invalid 12-word recovery phrase");
   }
-  const seed = bip39.mnemonicToSeedSync(normalized);
-  const root = bip32.fromSeed(seed, HLC_NETWORK);
-  const child = root.derivePath("m/44'/175'/0'/0/0");
-  const keyPair = ECPair.fromPrivateKey(Buffer.from(child.privateKey!), {
-    network: HLC_NETWORK,
-  });
-  const { address } = bitcoin.payments.p2pkh({
-    pubkey: Buffer.from(keyPair.publicKey),
-    network: HLC_NETWORK,
-  });
+  const seed = mnemonicToSeedSync(normalized);
+  const root = HDKey.fromMasterSeed(seed);
+  const child = root.derive("m/44'/175'/0'/0/0");
+  if (!child.privateKey || !child.publicKey) throw new Error("Derivation failed");
   return {
-    address: address!,
-    wif: keyPair.toWIF(),
+    address: pubkeyToAddress(child.publicKey),
+    wif: privkeyToWIF(child.privateKey),
     mnemonic: normalized,
   };
 }
 
-// Recover the address+WIF from an existing WIF private key.
 export function walletFromWIF(wif: string): { address: string; wif: string } {
-  const keyPair = ECPair.fromWIF(wif.trim(), HLC_NETWORK);
-  const { address } = bitcoin.payments.p2pkh({
-    pubkey: Buffer.from(keyPair.publicKey),
-    network: HLC_NETWORK,
-  });
-  return { address: address!, wif: wif.trim() };
+  const priv = wifToPrivkey(wif);
+  const pub = secp256k1.getPublicKey(priv, true);
+  return { address: pubkeyToAddress(pub), wif: wif.trim() };
 }
