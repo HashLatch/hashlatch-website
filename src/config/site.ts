@@ -211,7 +211,7 @@ export const siteConfig = {
     heading: "Join the Community",
     items: [
       { name: "GitHub", icon: "🐙", href: "https://github.com/HashLatch" },
-      { name: "Discord", icon: "💬", href: "https://discord.gg/patdHzX6V" },
+      { name: "Discord", icon: "💬", href: "https://discord.gg/KpfEja9W6" },
       { name: "Twitter / X", icon: "𝕏", href: "https://x.com/HashLatch" },
       { name: "Email", icon: "✉️", href: "mailto:contact@hashlatch.online" },
     ],
@@ -222,7 +222,7 @@ export const siteConfig = {
     links: [
       { label: "GitHub", href: "https://github.com/HashLatch" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Discord", href: "https://discord.gg/patdHzX6V" },
+      { label: "Discord", href: "https://discord.gg/KpfEja9W6" },
       { label: "Twitter / X", href: "https://x.com/HashLatch" },
       { label: "Top 100", href: "/top-wallets" },
       { label: "Explorer", href: "https://explorer.hashlatch.online" },
