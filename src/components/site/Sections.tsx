@@ -491,7 +491,7 @@ export function Footer() {
             </p>
           </div>
           <div className="flex max-w-md flex-wrap items-center justify-center gap-x-6 gap-y-2 md:justify-end">
-            <a href="https://discord.gg/patdHzX6V" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Discord</a>
+            <a href="https://discord.gg/KpfEja9W6" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Discord</a>
             <a href="https://x.com/HashLatch" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Twitter/X</a>
             <a href="https://github.com/HashLatch" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">GitHub</a>
             <a href="mailto:contact@hashlatch.online" className="text-sm text-muted-foreground transition-colors hover:text-primary">Email</a>
