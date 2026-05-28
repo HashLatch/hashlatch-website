@@ -8,13 +8,11 @@ export const siteConfig = {
   },
   nav: {
     links: [
-      { label: "Home", href: "/" },
-      { label: "How to Mine", href: "/#mining" },
+      { label: "Mine", href: "/#mining" },
+      { label: "Nodes", href: "/#decentralization" },
       { label: "Explorer", href: "https://explorer.hashlatch.online" },
       { label: "Top Wallets", href: "/top-wallets" },
-      { label: "Decoder", href: "/decoder" },
-      { label: "Wallet", href: "/wallet" },
-      { label: "Simulator", href: "/simulator" },
+      { label: "Bounties", href: "/#bounty" },
       { label: "Tokenomics", href: "/#tokenomics" },
       { label: "Whitepaper", href: "/whitepaper" },
     ],
