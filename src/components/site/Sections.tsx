@@ -468,6 +468,85 @@ export function Community() {
   );
 }
 
+
+export function Decentralization() {
+  const nodeItems = [
+    {
+      icon: "🐧",
+      title: "Linux Node",
+      desc: "Full node for Ubuntu/Debian. Sync the chain and contribute to network security.",
+      href: "https://github.com/HashLatch/PoWH/releases/download/v1.0.0/hashlatch-linux-x64.tar.gz",
+      label: "Download Linux",
+      cmd: "tar -xzf hashlatch-linux-x64.tar.gz && ./hashlatchd -daemon",
+    },
+    {
+      icon: "🪟",
+      title: "Windows Node",
+      desc: "Full node for Windows x64. Run hashlatchd.exe to join the network.",
+      href: "https://github.com/HashLatch/PoWH/releases/download/v1.0.0/hashlatch-windows-x64.zip",
+      label: "Download Windows",
+      cmd: "hashlatchd.exe",
+    },
+    {
+      icon: "🌐",
+      title: "Connect to Peers",
+      desc: "Bootstrap your node instantly by connecting to the seed node.",
+      href: null,
+      label: null,
+      cmd: "hashlatch-cli addnode 34.185.173.154:18767 add",
+    },
+    {
+      icon: "⛏️",
+      title: "Start Mining",
+      desc: "Point your GPU miner to the public stratum and start earning HLC.",
+      href: "/#mining",
+      label: "Mining Guide",
+      cmd: "stratum+tcp://34.185.173.154:3052",
+    },
+  ];
+
+  return (
+    <section id="decentralization" className="py-24 md:py-32">
+      <Container>
+        <SectionHeading
+          eyebrow="Run a Node"
+          title="Decentralize the Network"
+          subtitle="Every node strengthens HashLatch. Download a binary, sync the chain, and become part of the infrastructure — no technical expertise required."
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {nodeItems.map((item) => (
+            <div
+              key={item.title}
+              className="reveal glass flex flex-col gap-5 rounded-2xl p-7"
+            >
+              <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary/10 text-3xl">
+                {item.icon}
+              </div>
+              <div>
+                <div className="mb-1 text-lg font-semibold">{item.title}</div>
+                <div className="text-sm text-muted-foreground">{item.desc}</div>
+              </div>
+              <code className="mt-auto rounded-lg bg-black/40 px-3 py-2 font-mono text-xs text-primary break-all">
+                {item.cmd}
+              </code>
+              {item.href && (
+                <a
+                  href={item.href}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-transform hover:translate-x-1"
+                >
+                  {item.label} <ArrowRight size={14} />
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 export function Footer() {
   const { footer, brand } = siteConfig;
   return (
