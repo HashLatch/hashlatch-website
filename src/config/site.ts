@@ -8,7 +8,6 @@ export const siteConfig = {
   },
   nav: {
     links: [
-      { label: "Home", href: "/" },
       { label: "How to Mine", href: "/#mining" },
       { label: "Nodes", href: "/#decentralization" },
       { label: "Explorer", href: "https://explorer.hashlatch.online" },
