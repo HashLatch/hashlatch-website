@@ -792,6 +792,8 @@ function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string
       }));
       // Build and sign transaction entirely in browser
       const rawHex = await buildAndSignTx(wallet.wif, utxos, to.trim(), n);
+      console.log('Raw TX hex:', rawHex);
+      console.log('UTXOs used:', utxos.length, 'Amount:', n);
       // Broadcast signed transaction — server never sees the key
       await api.broadcast(rawHex);
       onDone();
