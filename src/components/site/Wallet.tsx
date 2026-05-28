@@ -779,6 +779,8 @@ function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string
     if (!to.trim() || !Number.isFinite(n) || n <= 0) { setErr("Provide a valid recipient and amount"); return; }
     setBusy(true);
     try {
+      // Derive WIF from mnemonic (seed stays in browser)
+      const wallet = walletFromMnemonic(seed);
       // Fetch UTXOs for this address
       const utxoData = await api.utxos(from) as Array<Record<string, unknown>>;
       const utxos: UTXO[] = utxoData.map((u) => ({
@@ -789,7 +791,7 @@ function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string
         height: u.height as number,
       }));
       // Build and sign transaction entirely in browser
-      const rawHex = await buildAndSignTx(seed, utxos, to.trim(), n);
+      const rawHex = await buildAndSignTx(wallet.wif, utxos, to.trim(), n);
       // Broadcast signed transaction — server never sees the key
       await api.broadcast(rawHex);
       onDone();
