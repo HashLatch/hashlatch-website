@@ -218,7 +218,7 @@ function buildSignedTx(
   return bytesToHex(concat(version, inCount, ...ins, outCount, ...outs, locktime));
 }
 
-const FEE_RATE = 200; // satoshis per byte
+const FEE_RATE = 1000; // satoshis per byte (0.01 HLC/kB min relay fee)
 
 export async function buildAndSignTx(
   wif: string,
