@@ -779,7 +779,19 @@ function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string
     if (!to.trim() || !Number.isFinite(n) || n <= 0) { setErr("Provide a valid recipient and amount"); return; }
     setBusy(true);
     try {
-      await api.send({ from, to: to.trim(), amount: n, seed });
+      // Fetch UTXOs for this address
+      const utxoData = await api.utxos(from) as Array<Record<string, unknown>>;
+      const utxos: UTXO[] = utxoData.map((u) => ({
+        txid: u.txid as string,
+        outputIndex: u.outputIndex as number,
+        satoshis: u.satoshis as number,
+        script: u.script as string,
+        height: u.height as number,
+      }));
+      // Build and sign transaction entirely in browser
+      const rawHex = await buildAndSignTx(seed, utxos, to.trim(), n);
+      // Broadcast signed transaction — server never sees the key
+      await api.broadcast(rawHex);
       onDone();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Send failed");
