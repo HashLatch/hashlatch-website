@@ -51,6 +51,10 @@ export const api = {
     get<Record<string, unknown>>(
       address ? `/balance/${encodeURIComponent(address)}` : "/balance",
     ),
+  utxos: (address: string) =>
+    get<Array<Record<string, unknown>>>(
+      `/utxos/${encodeURIComponent(address)}`,
+    ),
   transactions: (address: string) =>
     get<Record<string, unknown>>(
       `/transactions/${encodeURIComponent(address)}`,
@@ -61,15 +65,9 @@ export const api = {
     ),
   decode: (txid: string) =>
     get<Record<string, unknown>>(`/decode/${encodeURIComponent(txid)}`),
-  send: (body: { from?: string; to: string; amount: number; seed?: string }) =>
-    post<Record<string, unknown>>("/send", body),
-  createBounty: (body: {
-    target_hash: string;
-    amount: number;
-    deadline: number;
-    from?: string;
-    seed?: string;
-  }) => post<Record<string, unknown>>("/bounty/create", body),
+  // Broadcast a pre-signed raw transaction hex — no keys touch the server
+  broadcast: (rawHex: string) =>
+    post<{ txid: string }>("/broadcast", { raw_hex: rawHex }),
   bounties: () => get<unknown>("/bounties"),
   walletTransactions: () => get<unknown>("/wallet/transactions"),
 };
