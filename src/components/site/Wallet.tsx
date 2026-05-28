@@ -12,7 +12,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { api, sha256Hex } from "@/lib/hashlatch-api";
-import { generateWallet, walletFromMnemonic, walletFromWIF } from "@/lib/hlc-wallet";
+import { generateWallet, walletFromMnemonic, walletFromWIF, buildAndSignTx, UTXO } from "@/lib/hlc-wallet";
 
 // Wallet is seed-phrase first. localStorage only stores address + passwordHash
 // (never the seed itself after setup). Seed phrase works on ANY device.
