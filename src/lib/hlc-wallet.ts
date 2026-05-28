@@ -218,7 +218,7 @@ function buildSignedTx(
   return bytesToHex(concat(version, inCount, ...ins, outCount, ...outs, locktime));
 }
 
-const FEE_RATE = 10; // satoshis per byte
+const FEE_RATE = 200; // satoshis per byte
 
 export async function buildAndSignTx(
   wif: string,
