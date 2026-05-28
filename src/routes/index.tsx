@@ -8,6 +8,7 @@ import {
   Roadmap,
   Why,
   Community,
+  Decentralization,
   Footer,
 } from "@/components/site/Sections";
 import { LiveStats } from "@/components/site/LiveStats";
@@ -71,6 +72,7 @@ function Index() {
         <Tokenomics />
         <Roadmap />
         <Why />
+        <Decentralization />
         <Community />
         <Footer />
       </div>
