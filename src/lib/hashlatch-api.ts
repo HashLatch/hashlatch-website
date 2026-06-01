@@ -45,6 +45,37 @@ async function post<T = unknown>(path: string, body: unknown): Promise<T> {
   return res.json();
 }
 
+// ── Bounty types ──────────────────────────────────────────────────────────
+export type BountyCreateParams = {
+  /** Plaintext secret — server computes SHA256(plaintext) = target_hash */
+  plaintext: string;
+  amount: number;
+  /** Number of blocks until creator can reclaim (default 144 ≈ 24h) */
+  timelock: number;
+};
+
+export type BountyCommitParams = {
+  bounty_txid: string;
+  /** SHA256(solution + solver_address + nonce) — computed client-side */
+  commit_hash: string;
+  solver_address: string;
+};
+
+export type BountyRevealParams = {
+  bounty_txid: string;
+  solution: string;
+  nonce: string;
+  payout_address: string;
+};
+
+export type BountyReclaimParams = {
+  bounty_txid: string;
+};
+
+export type BountyVerifyParams = {
+  text: string;
+};
+
 export const api = {
   blockchainInfo: () => get<Record<string, unknown>>("/blockchaininfo"),
   balance: (address?: string) =>
@@ -65,10 +96,49 @@ export const api = {
     ),
   decode: (txid: string) =>
     get<Record<string, unknown>>(`/decode/${encodeURIComponent(txid)}`),
-  // Broadcast a pre-signed raw transaction hex — no keys touch the server
   broadcast: (rawHex: string) =>
     post<{ txid: string }>("/broadcast", { raw_hex: rawHex }),
-  bounties: () => get<unknown>("/bounties"),
+
+  // ── Bounties ──────────────────────────────────────────────────────────
+  /** List active/all bounties */
+  bounties: (status = "active") =>
+    get<unknown>(`/bounties${status !== "active" ? `?status=${status}` : ""}`),
+
+  /** Create a new bounty — plaintext is hashed SHA256 server-side */
+  createBounty: (params: BountyCreateParams) =>
+    post<{ txid: string; target_hash: string; amount: number; timelock: number; status: string }>(
+      "/bounty/create",
+      params,
+    ),
+
+  /** Commit solution hash (step 1 of 2 — anti-frontrun) */
+  commitBounty: (params: BountyCommitParams) =>
+    post<{ status: string; txid: string; blocks_to_wait: number }>(
+      "/bounty/commit",
+      params,
+    ),
+
+  /** Reveal solution after 6 blocks (step 2 of 2) */
+  revealBounty: (params: BountyRevealParams) =>
+    post<{ status: string; txid: string }>(
+      "/bounty/reveal",
+      params,
+    ),
+
+  /** Creator reclaims expired bounty */
+  reclaimBounty: (params: BountyReclaimParams) =>
+    post<{ status: string; txid: string }>(
+      "/bounty/reclaim",
+      params,
+    ),
+
+  /** Compute SHA256 of plaintext (useful for verifying solution before committing) */
+  hashText: (params: BountyVerifyParams) =>
+    post<{ hash: string; input: string }>(
+      "/bounty/hash",
+      params,
+    ),
+
   walletTransactions: () => get<unknown>("/wallet/transactions"),
 };
 
