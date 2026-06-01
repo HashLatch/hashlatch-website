@@ -816,22 +816,35 @@ function SendModal({ from, seed, onClose, onDone }: { from: string; seed: string
   );
 }
 
-function BountyModal({ from, seed, onClose, onDone }: { from: string; seed: string; onClose: () => void; onDone: () => void }) {
-  const [targetHash, setTargetHash] = useState("");
+function BountyModal({ from, onClose, onDone }: { from: string; seed?: string; onClose: () => void; onDone: () => void }) {
+  // Step 1: create | Step 2: success
+  const [step, setStep] = useState<"create" | "success">("create");
+  const [plaintext, setPlaintext] = useState("");
+  const [hashPreview, setHashPreview] = useState("");
   const [amount, setAmount] = useState("");
-  const [deadline, setDeadline] = useState("");
+  const [timelock, setTimelock] = useState("144");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<{ txid?: string; target_hash?: string } | null>(null);
+
+  // Live SHA256 preview as user types plaintext
+  useEffect(() => {
+    if (!plaintext) { setHashPreview(""); return; }
+    sha256Hex(plaintext).then(setHashPreview);
+  }, [plaintext]);
+
   const submit = async () => {
     setErr(null);
     const a = Number(amount);
-    const d = Number(deadline);
-    if (!targetHash.trim() || !Number.isFinite(a) || a <= 0 || !Number.isFinite(d)) {
-      setErr("Provide target hash, amount and deadline"); return;
-    }
+    const t = Number(timelock);
+    if (!plaintext.trim()) { setErr("Enter the secret (plaintext) to hash"); return; }
+    if (!Number.isFinite(a) || a <= 0) { setErr("Amount must be > 0 HLC"); return; }
+    if (!Number.isFinite(t) || t < 1) { setErr("Timelock must be ≥ 1 block"); return; }
     setBusy(true);
     try {
-      await api.createBounty({ from, seed, target_hash: targetHash.trim(), amount: a, deadline: d });
+      const r = await api.createBounty({ plaintext: plaintext.trim(), amount: a, timelock: t });
+      setResult(r);
+      setStep("success");
       onDone();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Bounty creation failed");
@@ -839,19 +852,106 @@ function BountyModal({ from, seed, onClose, onDone }: { from: string; seed: stri
       setBusy(false);
     }
   };
+
+  const timelockOptions: [string, string][] = [
+    ["72",  "~12h  (72 blocks)"],
+    ["144", "~24h  (144 blocks)"],
+    ["288", "~48h  (288 blocks)"],
+    ["576", "~4 days (576 blocks)"],
+  ];
+
+  if (step === "success") {
+    return (
+      <ModalShell title="Bounty Created ✓" onClose={onClose}>
+        <div className="mb-3 rounded-md border border-emerald-400/30 bg-emerald-400/10 p-3 font-mono text-xs text-emerald-300">
+          ✓ Bounty submitted to the blockchain!
+        </div>
+        {result?.txid && (
+          <div className="mb-2">
+            <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">txid</div>
+            <code className="block break-all font-mono text-[11px] text-foreground/80">{result.txid}</code>
+          </div>
+        )}
+        {result?.target_hash && (
+          <div className="mb-4">
+            <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">target hash</div>
+            <code className="block break-all font-mono text-[11px] text-primary">{result.target_hash}</code>
+          </div>
+        )}
+        <button onClick={onClose}
+          className="w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground">
+          Close
+        </button>
+      </ModalShell>
+    );
+  }
+
   return (
     <ModalShell title="Create Bounty" onClose={onClose}>
-      <input value={targetHash} onChange={(e) => setTargetHash(e.target.value)} placeholder="target_hash (SHA-256 hex)"
-        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
-      <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (HLC)" inputMode="decimal"
-        className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
-      <input value={deadline} onChange={(e) => setDeadline(e.target.value)} placeholder="Deadline (block height)" inputMode="numeric"
-        className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary" />
-      {err && <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
+      <div className="mb-4 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-3 font-mono text-[11px] text-yellow-400">
+        ⚠ The plaintext is the <strong>secret</strong> solvers must find. It will be SHA256-hashed on-chain. Never reveal it until solved.
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Secret (plaintext)
+        </label>
+        <input
+          type="password"
+          value={plaintext}
+          onChange={(e) => setPlaintext(e.target.value)}
+          placeholder="password, phrase, number…"
+          className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
+        />
+        {hashPreview && (
+          <div className="mt-1 rounded border border-primary/20 bg-primary/5 px-2 py-1.5">
+            <div className="mb-0.5 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">target hash (on-chain)</div>
+            <code className="break-all font-mono text-[10px] text-primary">{hashPreview}</code>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Reward (HLC)
+        </label>
+        <input
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="10.00"
+          inputMode="decimal"
+          className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Timelock
+        </label>
+        <select
+          value={timelock}
+          onChange={(e) => setTimelock(e.target.value)}
+          className="w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
+        >
+          {timelockOptions.map(([v, l]) => (
+            <option key={v} value={v}>{l}</option>
+          ))}
+        </select>
+        <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+          After this many blocks you can reclaim funds if unsolved.
+        </div>
+      </div>
+
+      <div className="mb-4 rounded border border-border bg-background/40 px-3 py-2 font-mono text-[10px] text-muted-foreground">
+        Creator: <span className="text-primary">{from}</span>
+      </div>
+
+      {err && <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
       <button onClick={submit} disabled={busy}
-        className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50">
-        {busy ? "Broadcasting…" : "Create Bounty"}
+        className="w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Broadcasting…</> : "Create Bounty"}
       </button>
     </ModalShell>
   );
 }
+
