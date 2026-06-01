@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { api, sha256Hex } from "@/lib/hashlatch-api";
 import { Loader2, X, ChevronRight, Clock, Hash } from "lucide-react";
 
@@ -21,7 +21,7 @@ function short(s?: string, len = 16) {
 function ModalShell({
   title, onClose, children,
 }: {
-  title: string; onClose: () => void; children: React.ReactNode;
+  title: string; onClose: () => void; children: ReactNode;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
