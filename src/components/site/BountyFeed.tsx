@@ -17,7 +17,7 @@ function short(s?: string, len = 16) {
   return s.length > len ? `${s.slice(0, len)}…` : s;
 }
 
-// ── Modal shell matching Wallet.tsx style ─────────────────────────────────────
+// ── Modal shell ───────────────────────────────────────────────────────────────
 function ModalShell({
   title, onClose, children,
 }: {
@@ -44,18 +44,19 @@ function ClaimModal({
 }: {
   bounty: Bounty; solverAddress: string; onClose: () => void;
 }) {
-  const [step, setStep]         = useState<"commit" | "waiting" | "reveal" | "done">("commit");
-  const [solution, setSolution] = useState("");
-  const [nonce]                 = useState<string>(() => crypto.randomUUID().replace(/-/g, ""));
-  const [commitHash, setCommitHash] = useState("");
+  const [step, setStep]           = useState<"commit" | "waiting" | "reveal" | "done">("commit");
+  const [solution, setSolution]   = useState("");
+  // nonce returned by the server after commit — required for reveal
+  const [serverNonce, setServerNonce] = useState("");
+  const [commitTxid, setCommitTxid]   = useState("");
   const [commitBlock, setCommitBlock] = useState(0);
+  const [revealAfterBlock, setRevealAfterBlock] = useState(0);
   const [currentBlock, setCurrentBlock] = useState(0);
-  const [commitTxid, setCommitTxid] = useState("");
-  const [busy, setBusy]         = useState(false);
-  const [err, setErr]           = useState<string | null>(null);
-  const [verified, setVerified] = useState<boolean | null>(null);
+  const [busy, setBusy]           = useState(false);
+  const [err, setErr]             = useState<string | null>(null);
+  const [verified, setVerified]   = useState<boolean | null>(null);
 
-  // Fetch current block height for progress tracking
+  // Poll current block height
   useEffect(() => {
     const fetchBlock = async () => {
       try {
@@ -68,29 +69,30 @@ function ClaimModal({
     return () => clearInterval(id);
   }, []);
 
-  // Compute commit hash live
-  useEffect(() => {
-    if (!solution || !solverAddress) return;
-    sha256Hex(solution + solverAddress + nonce).then(setCommitHash);
-  }, [solution, solverAddress, nonce]);
-
+  // Verify solution hash against target
   const handleVerify = async () => {
     if (!solution || !bounty.target_hash) return;
     const computed = await sha256Hex(solution);
     setVerified(computed.toLowerCase() === String(bounty.target_hash).toLowerCase());
   };
 
+  // Step 1: commit — sends plaintext solution to server
+  // Server calls node: commitbounty (verifies SHA256, generates nonce, writes on-chain)
+  // Returns nonce we must store for reveal
   const handleCommit = async () => {
     setErr(null);
-    if (!commitHash) { setErr("Enter your solution first"); return; }
+    if (!solution)       { setErr("Enter your solution first"); return; }
+    if (!solverAddress)  { setErr("Connect your wallet first"); return; }
     setBusy(true);
     try {
       const r = await api.commitBounty({
         bounty_txid:    String(bounty.txid ?? ""),
-        commit_hash:    commitHash,
+        solution,
         solver_address: solverAddress,
       });
       setCommitTxid(String(r.txid ?? ""));
+      setServerNonce(String(r.nonce ?? ""));
+      setRevealAfterBlock(Number(r.reveal_after_block ?? currentBlock + 6));
       setCommitBlock(currentBlock);
       setStep("waiting");
     } catch (e) {
@@ -100,6 +102,7 @@ function ClaimModal({
     }
   };
 
+  // Step 2: reveal — uses server-generated nonce from commit response
   const handleReveal = async () => {
     setErr(null);
     setBusy(true);
@@ -107,7 +110,7 @@ function ClaimModal({
       await api.revealBounty({
         bounty_txid:    String(bounty.txid ?? ""),
         solution,
-        nonce,
+        nonce:          serverNonce,
         payout_address: solverAddress,
       });
       setStep("done");
@@ -118,8 +121,12 @@ function ClaimModal({
     }
   };
 
-  const blocksWaited = currentBlock - commitBlock;
-  const canReveal    = blocksWaited >= 6;
+  const blocksWaited = revealAfterBlock > 0
+    ? currentBlock - (revealAfterBlock - 6)
+    : currentBlock - commitBlock;
+  const canReveal = revealAfterBlock > 0
+    ? currentBlock >= revealAfterBlock
+    : blocksWaited >= 6;
 
   return (
     <ModalShell
@@ -184,11 +191,19 @@ function ClaimModal({
             )}
           </div>
 
-          {err && <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
+          {!solverAddress && (
+            <div className="mb-3 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-2 font-mono text-[11px] text-yellow-400">
+              ⚠ Open your wallet first to set a payout address.
+            </div>
+          )}
+
+          {err && (
+            <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>
+          )}
 
           <button
             onClick={handleCommit}
-            disabled={busy || !commitHash || verified === false}
+            disabled={busy || !solution || !solverAddress || verified === false}
             className="mt-2 w-full rounded-md bg-primary px-4 py-3 font-mono text-sm font-semibold text-primary-foreground disabled:opacity-40"
           >
             {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Committing…</> : "Commit Solution"}
@@ -212,11 +227,15 @@ function ClaimModal({
             <div className="h-2 overflow-hidden rounded-full bg-border">
               <div
                 className={`h-full rounded-full transition-all ${canReveal ? "bg-emerald-400" : "bg-primary"}`}
-                style={{ width: `${Math.min(100, (blocksWaited / 6) * 100)}%` }}
+                style={{ width: `${Math.min(100, (Math.max(0, blocksWaited) / 6) * 100)}%` }}
               />
             </div>
             <div className="mt-2 text-muted-foreground">
-              {canReveal ? "✓ Ready to reveal!" : `Wait ~${(6 - blocksWaited) * 10} more minutes`}
+              {canReveal
+                ? "✓ Ready to reveal!"
+                : revealAfterBlock > 0
+                  ? `Wait until block ${revealAfterBlock} (now: ${currentBlock})`
+                  : `Wait ~${(6 - Math.max(0, blocksWaited)) * 2} more minutes`}
             </div>
           </div>
           {canReveal && (
@@ -234,28 +253,25 @@ function ClaimModal({
       {step === "reveal" && (
         <>
           <div className="mb-4 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-3 font-mono text-[11px] text-yellow-400">
-            ⚠ Make sure this is the exact solution and nonce from your commit.
+            ⚠ Revealing solution on-chain. This will pay out the bounty.
           </div>
           <div className="mb-3 rounded border border-border bg-background/40 p-3">
             <div className="mb-1 font-mono text-[10px] text-muted-foreground">Solution</div>
-            <div className="font-mono text-xs text-primary">{solution || "(re-enter below)"}</div>
+            <div className="font-mono text-xs text-primary">{solution}</div>
           </div>
-          {!solution && (
-            <input
-              value={solution}
-              onChange={(e) => setSolution(e.target.value)}
-              placeholder="Re-enter your solution"
-              className="mb-3 w-full rounded-md border border-border bg-background/60 p-3 font-mono text-xs outline-none focus:border-primary"
-            />
+          {/* Server nonce — set during commit, required for reveal */}
+          {serverNonce && (
+            <div className="mb-4 rounded border border-border bg-background/40 p-2 font-mono text-[10px]">
+              <span className="text-muted-foreground">commit nonce: </span>
+              <span className="break-all text-foreground/70">{serverNonce}</span>
+            </div>
           )}
-          <div className="mb-4 rounded border border-border bg-background/40 p-2 font-mono text-[10px]">
-            <span className="text-muted-foreground">nonce: </span>
-            <span className="break-all text-foreground/70">{nonce}</span>
-          </div>
-          {err && <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>}
+          {err && (
+            <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 font-mono text-[11px] text-destructive">{err}</div>
+          )}
           <button
             onClick={handleReveal}
-            disabled={busy || !solution}
+            disabled={busy || !solution || !serverNonce}
             className="w-full rounded-md bg-emerald-500 px-4 py-3 font-mono text-sm font-semibold text-black disabled:opacity-40"
           >
             {busy ? <><Loader2 size={14} className="mr-2 inline animate-spin" />Revealing…</> : "Reveal & Collect Reward"}
@@ -269,7 +285,7 @@ function ClaimModal({
           <div className="mb-3 text-4xl">🎉</div>
           <div className="mb-2 font-bold text-emerald-400">Bounty Solved!</div>
           <div className="font-mono text-xs text-muted-foreground">
-            Reward {bounty.amount} HLC will be sent to your address.
+            Reward {bounty.amount} HLC sent to your address.
           </div>
           <button onClick={onClose}
             className="mt-6 rounded-md bg-primary px-8 py-3 font-mono text-sm font-semibold text-primary-foreground">
@@ -289,7 +305,7 @@ export function BountyFeed() {
   const [claiming, setClaiming]     = useState<Bounty | null>(null);
   const [solverAddr, setSolverAddr] = useState<string>("");
 
-  // Read connected wallet address if available
+  // Read connected wallet address from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("hashlatch_wallet_v3");
@@ -303,6 +319,7 @@ export function BountyFeed() {
   const load = useCallback(async () => {
     try {
       const d = await api.bounties(filter);
+      // API returns plain array; legacy versions return { bounties: [...] }
       const arr = Array.isArray(d)
         ? (d as Bounty[])
         : ((d as { bounties?: Bounty[] })?.bounties ?? []);
@@ -436,9 +453,10 @@ export function BountyFeed() {
           </div>
         )}
 
+        {/* Error banner */}
         {error && (
           <div className="mt-6 text-center font-mono text-xs text-primary">
-            ⚠ API unreachable — retrying every 60s
+            ⚠ {error} — retrying every 60s
           </div>
         )}
       </div>
