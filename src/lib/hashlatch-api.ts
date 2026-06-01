@@ -1,5 +1,5 @@
 // Browser-side client for the HashLatch mainnet RPC bridge.
-// CORS is configured server-side.
+// CORS is configured server-side (flask-cors + after_request fallback).
 import { API_BASE, EXPLORER_URL as EXPLORER } from "@/config/api";
 
 export const HASHLATCH_API_BASE = API_BASE;
@@ -56,14 +56,20 @@ export type BountyCreateParams = {
 
 export type BountyCommitParams = {
   bounty_txid: string;
-  /** SHA256(solution + solver_address + nonce) — computed client-side */
-  commit_hash: string;
+  /**
+   * Plaintext solution (the secret that hashes to target_hash).
+   * The server passes it to the node, which verifies SHA256(solution) == target_hash,
+   * generates a server-side nonce, and writes SHA256(solution+address+nonce) on-chain.
+   * The nonce is returned in the response — store it for revealbounty.
+   */
+  solution: string;
   solver_address: string;
 };
 
 export type BountyRevealParams = {
   bounty_txid: string;
   solution: string;
+  /** Server-generated nonce returned by commitBounty — must match exactly */
   nonce: string;
   payout_address: string;
 };
@@ -100,7 +106,7 @@ export const api = {
     post<{ txid: string }>("/broadcast", { raw_hex: rawHex }),
 
   // ── Bounties ──────────────────────────────────────────────────────────
-  /** List active/all bounties */
+  /** List bounties. status = "active" (default) | "all" */
   bounties: (status = "active") =>
     get<unknown>(`/bounties${status !== "active" ? `?status=${status}` : ""}`),
 
@@ -111,14 +117,25 @@ export const api = {
       params,
     ),
 
-  /** Commit solution hash (step 1 of 2 — anti-frontrun) */
+  /**
+   * Commit solution (step 1/2 — anti-frontrun).
+   * Sends plaintext solution to server; node verifies + commits hash on-chain.
+   * Response includes `nonce` — save it for revealBounty.
+   */
   commitBounty: (params: BountyCommitParams) =>
-    post<{ status: string; txid: string; blocks_to_wait: number }>(
+    post<{
+      status: string;
+      txid: string;
+      commit_hash: string;
+      nonce: string;
+      reveal_after_block: number;
+      blocks_to_wait: number;
+    }>(
       "/bounty/commit",
       params,
     ),
 
-  /** Reveal solution after 6 blocks (step 2 of 2) */
+  /** Reveal solution after 6 blocks (step 2/2). nonce = from commitBounty response. */
   revealBounty: (params: BountyRevealParams) =>
     post<{ status: string; txid: string }>(
       "/bounty/reveal",
