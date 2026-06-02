@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { api, sha256Hex } from "@/lib/hashlatch-api";
 import { Loader2, X, ChevronRight, Clock, Hash } from "lucide-react";
 
@@ -402,7 +402,7 @@ export function BountyFeed() {
             {list.map((b, i) => (
               <div
                 key={(b.txid as string) ?? i}
-                className="reveal flex flex-col rounded-2xl border border-primary/40 bg-black/60 p-5 font-mono text-xs shadow-[0_0_30px_color-mix(in_oklab,var(--primary)_8%,transparent)]"
+                className="flex flex-col rounded-2xl border border-primary/40 bg-black/60 p-5 font-mono text-xs shadow-[0_0_30px_color-mix(in_oklab,var(--primary)_8%,transparent)] opacity-100 translate-y-0 transition-all"
               >
                 {/* Status badge */}
                 <div className="mb-3 flex items-center justify-between">
