@@ -439,7 +439,17 @@ export function BountyFeed() {
 
                 {/* Claim button */}
                 {!b.solved && (
-                  <div className="mt-auto pt-4">
+                  <div className="mt-auto pt-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => {
+                        const cmd = `hashcat -a 0 -m 1400 ${b.target_hash} wordlist.txt`;
+                        navigator.clipboard.writeText(cmd).catch(() => {});
+                        alert("Hashcat command copied!\n\n" + cmd + "\n\nPaste it in your terminal. When done, click Solve & Claim.");
+                      }}
+                      className="w-full rounded-md border border-border bg-white/5 py-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      ⧉ Copy hashcat command
+                    </button>
                     <button
                       onClick={() => setClaiming(b)}
                       className="w-full rounded-md border border-primary/40 bg-primary/10 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_20px_color-mix(in_oklab,var(--primary)_30%,transparent)]"
